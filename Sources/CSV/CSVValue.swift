@@ -24,11 +24,9 @@
 
 import Foundation
 
-protocol CSVValue {
-    
+public protocol CSVValue {
     
 }
-
 
 extension String : CSVValue {
     
@@ -43,5 +41,72 @@ extension Double : CSVValue {
 }
 
 extension Int : CSVValue {
+    
+}
+
+extension CSVValue {
+    
+    public static func != (_ lhs: Self,_ rhs: Self) -> Bool {
+        
+        return !(lhs == rhs)
+        
+    }
+    
+    public static func == (_ lhs: Self,_ rhs: Self) -> Bool {
+
+        return lhs.equals(rhs)
+    }
+    
+    public func equals<Val: CSVValue>(_ rhs: Val) -> Bool {
+        
+        if let l = self as? String, let r = rhs as? String {
+            return l == r
+        }
+        
+        if let l = self as? Date, let r = rhs as? Date {
+            return l == r
+        }
+        
+        if let l = self as? Double, let r = rhs as? Double {
+            return l == r
+        }
+        
+        if let l = self as? Int, let r = rhs as? Int {
+            return l == r
+        }
+        
+        return false
+    }
+}
+
+extension Optional where Wrapped == CSVValue {
+    
+    public func equals<Val : CSVValue>(_ rhs : Val) -> Bool {
+        
+        if let me = self {
+            return me.equals(rhs)
+        } else {
+            return false
+        }
+        
+    }
+    
+}
+
+extension Array where Element: CSVValue {
+    
+    func equals(_ rhs: Self) -> Bool {
+        
+        guard self.count == rhs.count else {
+            return false
+        }
+        
+        for idx in 0..<self.count {
+            if !(self[idx] == rhs[idx]){
+                return false
+            }
+        }
+        return true
+    }
     
 }

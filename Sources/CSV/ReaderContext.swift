@@ -27,9 +27,9 @@ import Foundation
 struct ReaderContext {
     
     
-    let delimiter : UInt8 = 0x2C
-    let eol : EOL = .LF
-    let enclose : Optional<UInt8> = 0x22
+    var delimiter : UInt8 = 0x2C
+    var eol : EOL = .LF
+    var enclose : Optional<UInt8> = 0x22
     
     let lineLimit : Int? = 0
     let skipHead = false

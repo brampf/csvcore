@@ -39,10 +39,11 @@ extension CSVFile {
         
     }
     
-    public static func read(_ data: Data,_ spec: [FormatSpecifier?] = []) -> CSVFile? {
+    public static func read(_ data: Data,_ spec: [FormatSpecifier?] = [], eol: EOL = .LF) -> CSVFile? {
         
         var context = ReaderContext()
         context.format = spec
+        context.eol = eol
         
         return data.withUnsafeBytes { bytes in
             CSVFile.read(bytes, context: &context)
@@ -123,13 +124,11 @@ extension CSVFile {
     
     static func readHead(_ record: Slice<UnsafeRawBufferPointer>, context: inout ReaderContext) -> [String] {
         
-        return record.split(separator: context.delimiter).map { data in
-            return String(data: Data(data), encoding: .utf8) ?? ""
-        }
+        return readValues(record, context: &context, ignoreFormat: true) as? [String] ?? []
         
     }
     
-    static func readValues(_ record: Slice<UnsafeRawBufferPointer>, context: inout ReaderContext) -> [CSVValue] {
+    static func readValues(_ record: Slice<UnsafeRawBufferPointer>, context: inout ReaderContext, ignoreFormat: Bool = false) -> [CSVValue] {
     
         var row : [CSVValue] = .init()
             
@@ -141,7 +140,7 @@ extension CSVFile {
             if char == context.delimiter && !enclosed { return true }
             return false
         }){
-            let spec : FormatSpecifier? = context.format.count > column ? context.format[column] : nil
+            let spec : FormatSpecifier? = !ignoreFormat && context.format.count > column ? context.format[column] : nil
             
             if let val = readValue(record[context.offset...nextOffset-1], spec, context){
                 row.append(val)
@@ -150,7 +149,14 @@ extension CSVFile {
             context.offset = nextOffset+1
             column += 1
             
-        }        
+        }
+        // read the last entry
+        let spec : FormatSpecifier? = !ignoreFormat && context.format.count > column ? context.format[column] : nil
+        // take care about the CR LF as these are to characters instead of just one
+        let lastOffset = context.eol == .CR_LF ? record.endIndex-2 : record.endIndex-1
+        if let val = readValue(record[context.offset...lastOffset], spec, context){
+            row.append(val)
+        }
         
         return row
     }
