@@ -88,7 +88,6 @@ extension Optional where Wrapped == CSVValue {
         } else {
             return false
         }
-        
     }
     
 }

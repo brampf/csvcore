@@ -24,24 +24,7 @@
 
 import Foundation
 
-struct ReaderContext {
+public struct WriterContext {
     
-    let config : CSVConfig
-    
-    var lineLimit : Int? = 0
-    var skipHead = false
-    
-    internal var offset = 0
-    
-    internal var valueIndex: Int = 0
-    internal var valueStart: Int = 0
-    internal var valueEnd: Int = 0
-    
-    mutating func reset() {
-        
-        self.offset = 0
-        self.valueIndex = 0
-        self.valueStart = 0
-        self.valueEnd = 0
-    }
+    public let config : CSVConfig
 }
