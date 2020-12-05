@@ -6,7 +6,11 @@ final class ReaderTests: XCTestCase {
     static var allTests = [
         ("testReadString", testReadString),
         ("testReadNumber", testReadNumber),
-        ("testReadDate", testReadDate)
+        ("testReadDate", testReadDate),
+        ("testReadLines", testReadLines),
+        ("testReadLines2", testReadLines2),
+        ("testReadLines3", testReadLines3),
+        ("testReadValues", testReadValues)
     ]
     
     func testReadString() {
@@ -143,15 +147,56 @@ final class ReaderTests: XCTestCase {
         XCTAssertSame("11,12\n21,22\n31,32\n41,42\n", config,  [[11,12],[21,22],[31,32],[41,42]])
         
         XCTAssertSame("11,12\n21,22\n31,32\n41,42", config, [[11,12],[21,22],[31,32],[41,42]])
-
-        XCTAssertSame("\n", config, [[nil]])
+    }
+    
+    func testReadLines2() {
         
-        XCTAssertSame(",\n,", config, [[nil,nil],[nil,nil]])
+        let config = CSVConfig()
+        
+        XCTAssertSame("\n", config, [])
+        
+        XCTAssertSame(",\n,", config, [])
+        
+    }
+    
+    func testReadLines3() {
+        
+        let config = CSVConfig()
+        
+        XCTAssertSame("Hello\nWorld", config, [["Hello"],["World"]])
+        
+        XCTAssertSame("Hello,World", config, [["Hello","World"]])
+        
+        XCTAssertSame("\"Hello\"\n\"World\"", config, [["Hello"],["World"]])
+        
+        XCTAssertSame("\"Hello\",\"World\"", config, [["Hello","World"]])
+    }
+    
+    func testReadLines4() {
+        
+        var config = CSVConfig()
+        config.eol = .LF
+        config.format = .init(arrayLiteral:
+                                nil, // FormatSpecifier.Text(encoding: .utf8),
+                              FormatSpecifier.Number(),
+                              FormatSpecifier.Number(format: NumberFormatter(",")),
+                              FormatSpecifier.Number(format: NumberFormatter(".")),
+                              FormatSpecifier.Date(format: DateFormatter("dd.MM.yyyy")),
+                              FormatSpecifier.Date(format: DateFormatter("yyyy/MM/dd")),
+                              FormatSpecifier.Date(format: DateFormatter("yyyy-MM-dd")))
+        
+        
+        XCTAssertSame("\"One\",\"42\",\"23,32\",\"32.32\",\"21.12.2012\",\"2020/11/02\",\"2020-11-03\"", config,
+                      [["One",42.0,23.32,32.32,
+                        DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2012, month: 12, day: 21, hour: 0, minute: 0, second: 0).date!,
+                        DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!,
+                        DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!]])
+        
     }
     
     func testReadValues() {
         
-        let line1 = "Test,42,23.43,\"-100.000,00\",\"31.12.2020\""
+        let line1 = "Test,42,23.43,\"-100.000,00\",\"Hello, World\",\"31.12.2020\""
         
         let formatter = NumberFormatter()
         formatter.groupingSize = 3
@@ -162,9 +207,10 @@ final class ReaderTests: XCTestCase {
         var config = CSVConfig()
         config.format = [
             FormatSpecifier.Text(encoding: .utf8),
-            FormatSpecifier.Number(format: nil),
+            FormatSpecifier.Text(),
             FormatSpecifier.Number(format: nil),
             FormatSpecifier.Number(format: formatter),
+            FormatSpecifier.Text(),
             FormatSpecifier.Date(format: DateFormatter("dd.MM.yyyy"))
         ]
         
@@ -177,12 +223,13 @@ final class ReaderTests: XCTestCase {
         
         
         
-        XCTAssertEqual(result1?.count, 5)
+        XCTAssertEqual(result1?.count, 6)
         XCTAssertSame(result1?[0], "Test")
-        XCTAssertSame(result1?[1], 42.0)
+        XCTAssertSame(result1?[1], "42")
         XCTAssertSame(result1?[2], 23.43)
         XCTAssertSame(result1?[3], -100000.0)
-        XCTAssertSame(result1?[4], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 12, day: 31, hour: 0, minute: 0, second: 0).date!)
+        XCTAssertSame(result1?[4], "Hello, World")
+        XCTAssertSame(result1?[5], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 12, day: 31, hour: 0, minute: 0, second: 0).date!)
         
         
     }

@@ -65,6 +65,10 @@ struct CSVReader {
             
             if char == context.config.enclose {
                 // we just hit a string delimiter
+                if !enclosed {
+                    context.valueStart += 1
+                }
+                
                 enclosed.toggle()
             }
             if !enclosed {
@@ -72,23 +76,30 @@ struct CSVReader {
                 if char == context.config.delimiter {
                     // read value
                     readValue(data, &context, &row)
+                    // skip over this character
                     context.valueStart += 1
                 }
                 if char == 0x0A && context.config.eol == .LF {
                     // read last value in row
                     readValue(data, &context, &row)
+                    // skip over this character
+                    context.valueStart += 1
                     // exit loop
                     lineEnd.toggle()
                 }
                 if char == 0x0D && context.config.eol == .CR {
                     // read last value in row
                     readValue(data, &context, &row)
+                    // skip over this character
+                    context.valueStart += 1
                     // exit loop
                     lineEnd.toggle()
                 }
                 if char == 0x15 && context.config.eol == .NL {
                     // read last value in row
                     readValue(data, &context, &row)
+                    // skip over this character
+                    context.valueStart += 1
                     // exit loop
                     lineEnd.toggle()
                 }
@@ -100,6 +111,8 @@ struct CSVReader {
                     context.valueEnd -= 1
                     // read last value in row
                     readValue(data, &context, &row)
+                    // skip over this character
+                    context.valueStart += 2
                     // exit loop
                     lineEnd.toggle()
                 }

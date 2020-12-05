@@ -35,7 +35,7 @@ final class CSVCoreTests: XCTestCase {
         XCTAssertSame(file?.rows[0][1], 42.0)
         XCTAssertSame(file?.rows[0][2], 23.32)
         XCTAssertSame(file?.rows[0][3], 32.32)
-        XCTAssertSame(file?.rows[0][4], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 12, day: 21, hour: 0, minute: 0, second: 0).date!)
+        XCTAssertSame(file?.rows[0][4], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2012, month: 12, day: 21, hour: 0, minute: 0, second: 0).date!)
         XCTAssertSame(file?.rows[0][5], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!)
         XCTAssertSame(file?.rows[0][6], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!)
         
