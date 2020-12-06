@@ -28,6 +28,13 @@ public struct CSVFile {
     public var header : [String] = []
     public var rows : [[CSVValue?]] = []
     
+    /**
+     Initializer
+     */
+    public init(header: [String] = [], rows: [[CSVValue?]] = []) {
+        self.header = header
+        self.rows = rows
+    }
 }
 
 extension CSVFile {
