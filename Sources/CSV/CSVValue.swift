@@ -24,7 +24,7 @@
 
 import Foundation
 
-public protocol CSVValue {
+public protocol CSVValue : CustomStringConvertible{
     
 }
 

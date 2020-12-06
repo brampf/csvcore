@@ -40,6 +40,10 @@ public struct CSVConfig {
     public var enclose : Optional<UInt8> = 0x22
     
     public var format : [FormatSpecifier?] = []
+    
+    mutating func setDelimiter(to: Character){
+        self.delimiter = to.asciiValue ?? 0x2C
+    }
 }
 
 

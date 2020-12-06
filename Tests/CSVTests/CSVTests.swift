@@ -12,7 +12,6 @@ final class CSVCoreTests: XCTestCase {
     func test0001() {
         
         let url = Bundle.module.url(forResource: "test0001", withExtension: "csv")!
-        let data = try! Data(contentsOf: url)
             
         var config = CSVConfig()
         config.eol = .LF
@@ -25,7 +24,7 @@ final class CSVCoreTests: XCTestCase {
                               FormatSpecifier.Date(format: DateFormatter("yyyy/MM/dd")),
                               FormatSpecifier.Date(format: DateFormatter("yyyy-MM-dd")))
         
-        let file = CSVFile.read(data, config)
+        let file = try! CSVFile.read(contentsOf: url, config: config)
         
 
         XCTAssertEqual(file?.header, ["String","Number1","Number2","Number3","Date1","Date2","Date3"])
@@ -45,12 +44,12 @@ final class CSVCoreTests: XCTestCase {
     func test0002() {
         
         let url = Bundle.module.url(forResource: "test0002", withExtension: "csv")!
-        let data = try! Data(contentsOf: url)
         
         var config = CSVConfig()
         config.eol = .CR_LF
+        config.delimiter = Character(",").asciiValue!
         
-        let file = CSVFile.read(data, config)
+        let file = try! CSVFile.read(contentsOf: url, config: config)
         
         XCTAssertEqual(file?.rows.count, 32445)
         XCTAssertEqual(file?.header, ["Year","Industry_aggregation_NZSIOC","Industry_code_NZSIOC","Industry_name_NZSIOC","Units","Variable_code","Variable_name","Variable_category","Value","Industry_code_ANZSIC06"])
