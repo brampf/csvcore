@@ -24,12 +24,14 @@
 
 import Foundation
 
-public protocol CSVValue : CustomStringConvertible{
+public protocol CSVValue : CustomStringConvertible {
+    
+    var hashValue: Int {get}
     
 }
 
 extension String : CSVValue {
-    
+
 }
 
 extension Date : CSVValue {
@@ -43,6 +45,7 @@ extension Double : CSVValue {
 extension Int : CSVValue {
     
 }
+
 
 extension CSVValue {
     
