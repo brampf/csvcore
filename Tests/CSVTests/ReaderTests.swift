@@ -7,9 +7,12 @@ final class ReaderTests: XCTestCase {
         ("testReadString", testReadString),
         ("testReadNumber", testReadNumber),
         ("testReadDate", testReadDate),
+        ("testReadValue", testReadValue),
         ("testReadLines", testReadLines),
         ("testReadLines2", testReadLines2),
         ("testReadLines3", testReadLines3),
+        ("testReadLines4", testReadLines4),
+        ("testReadLines5", testReadLines5),
         ("testReadValues", testReadValues)
     ]
     
@@ -37,11 +40,11 @@ final class ReaderTests: XCTestCase {
         XCTAssertEqual(integer, 42)
      
         
-        let float_dot = "23.23".data(using: .utf8)?.withUnsafeBytes({ ptr in
+        let float_dot = "32.32".data(using: .utf8)?.withUnsafeBytes({ ptr in
             CSVReader.readNumber(ptr.suffix(from: 0), nil)
         })
         
-        XCTAssertEqual(float_dot, 23.23)
+        XCTAssertEqual(float_dot, 32.32)
         
         let float_comma = "23,23".data(using: .utf8)?.withUnsafeBytes({ ptr in
             CSVReader.readNumber(ptr.suffix(from: 0), NumberFormatter(","))
@@ -157,6 +160,10 @@ final class ReaderTests: XCTestCase {
         
         XCTAssertSame(",\n,", config, [])
         
+        XCTAssertSame("\"\",\n,", config, [])
+        
+        XCTAssertSame("\",\"\n,", config, [[","]])
+        
     }
     
     func testReadLines3() {
@@ -169,7 +176,21 @@ final class ReaderTests: XCTestCase {
         
         XCTAssertSame("\"Hello\"\n\"World\"", config, [["Hello"],["World"]])
         
+        XCTAssertSame("Hello\n\"World\"", config, [["Hello"],["World"]])
+        
+        XCTAssertSame("\"Hello\"\nWorld", config, [["Hello"],["World"]])
+        
         XCTAssertSame("\"Hello\",\"World\"", config, [["Hello","World"]])
+        
+        XCTAssertSame("\"Hello\",World", config, [["Hello","World"]])
+        
+        XCTAssertSame("Hello,\"World\"", config, [["Hello","World"]])
+        
+        XCTAssertSame("\"Hello\",\"World\"\nHallo,Welt", config, [["Hello","World"],["Hallo","Welt"]])
+        
+        XCTAssertSame("Hello,\"World\"\nHallo,Welt", config, [["Hello","World"],["Hallo","Welt"]])
+        
+        XCTAssertSame("Hello,\"World\"\n\"Hallo\",Welt", config, [["Hello","World"],["Hallo","Welt"]])
     }
     
     func testReadLines4() {
@@ -180,7 +201,7 @@ final class ReaderTests: XCTestCase {
                                 nil, // FormatSpecifier.Text(encoding: .utf8),
                               FormatSpecifier.Number(),
                               FormatSpecifier.Number(format: NumberFormatter(",")),
-                              FormatSpecifier.Number(format: NumberFormatter(".")),
+                              FormatSpecifier.Number(),
                               FormatSpecifier.Date(format: DateFormatter("dd.MM.yyyy")),
                               FormatSpecifier.Date(format: DateFormatter("yyyy/MM/dd")),
                               FormatSpecifier.Date(format: DateFormatter("yyyy-MM-dd")))
@@ -191,6 +212,14 @@ final class ReaderTests: XCTestCase {
                         DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2012, month: 12, day: 21, hour: 0, minute: 0, second: 0).date!,
                         DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!,
                         DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!]])
+        
+    }
+    
+    func testReadLines5() {
+        
+        let config = CSVConfig()
+        
+        XCTAssertSame("2019,Level 1,AA,\"Agriculture, Forestry and Fishing\",Dollars (millions),H10,Indirect taxes,Financial performance,475,ANZSIC06 division A", config,  [["2019","Level 1","AA","Agriculture, Forestry and Fishing","Dollars (millions)","H10","Indirect taxes","Financial performance","475","ANZSIC06 division A"]])
         
     }
     

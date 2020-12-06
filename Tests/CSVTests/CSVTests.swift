@@ -5,7 +5,8 @@ final class CSVCoreTests: XCTestCase {
 
     static var allTests = [
         ("test0001", test0001),
-        ("test0002", test0002)
+        ("test0002", test0002),
+        ("test0002", test0003)
     ]
     
     func test0001() {
@@ -19,7 +20,7 @@ final class CSVCoreTests: XCTestCase {
                                 nil, // FormatSpecifier.Text(encoding: .utf8),
                               FormatSpecifier.Number(),
                               FormatSpecifier.Number(format: NumberFormatter(",")),
-                              FormatSpecifier.Number(format: NumberFormatter(".")),
+                              FormatSpecifier.Number(),
                               FormatSpecifier.Date(format: DateFormatter("dd.MM.yyyy")),
                               FormatSpecifier.Date(format: DateFormatter("yyyy/MM/dd")),
                               FormatSpecifier.Date(format: DateFormatter("yyyy-MM-dd")))

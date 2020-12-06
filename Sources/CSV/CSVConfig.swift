@@ -85,9 +85,8 @@ extension NumberFormatter {
     public convenience init(_ decimalSeperator : StringLiteralType) {
         self.init()
         
-        //self.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
+        self.allowsFloats = true
         self.decimalSeparator = decimalSeparator
-        self.numberStyle = .decimal
         
     }
     

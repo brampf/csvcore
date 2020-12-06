@@ -32,6 +32,7 @@ struct ReaderContext {
     var skipHead = false
     
     internal var offset = 0
+    internal var ignoreFormat = false
     
     internal var valueIndex: Int = 0
     internal var valueStart: Int = 0

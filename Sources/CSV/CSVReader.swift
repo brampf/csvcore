@@ -32,9 +32,11 @@ struct CSVReader {
         
         // read head
         if !context.skipHead {
+            context.ignoreFormat = true
             if context.offset < data.endIndex, let head = self.readLine(data, context: &context) as? [String] {
                 new.header = head
             }
+            context.ignoreFormat = false
         }
         
         
@@ -57,27 +59,30 @@ struct CSVReader {
  
         // parser flags
         var enclosed = false
+        var wasEnclosed = false
         var firstEOL = false
         var lineEnd = false
         
         var iterator = data.suffix(from: context.offset).makeIterator()
         while !lineEnd, let char = iterator.next() {
             
-            if char == context.config.enclose {
-                // we just hit a string delimiter
-                if !enclosed {
+            if !enclosed {
+                if char == context.config.enclose {
+                    // we just hit a string delimiter
+                    enclosed = true
+                    // skip over this character
                     context.valueStart += 1
                 }
-                
-                enclosed.toggle()
-            }
-            if !enclosed {
-                
                 if char == context.config.delimiter {
                     // read value
                     readValue(data, &context, &row)
                     // skip over this character
                     context.valueStart += 1
+                    if wasEnclosed {
+                        context.valueStart += 1
+                        context.valueEnd += 1
+                        wasEnclosed = false
+                    }
                 }
                 if char == 0x0A && context.config.eol == .LF {
                     // read last value in row
@@ -116,6 +121,16 @@ struct CSVReader {
                     // exit loop
                     lineEnd.toggle()
                 }
+            } else {
+                
+                if char == context.config.enclose {
+                    // we just hit a string delimiter
+                    enclosed = false
+                    // skip over this character
+                    context.valueEnd -= 1
+                    
+                    wasEnclosed = true
+                }
             }
             
             // move word pointer
@@ -138,20 +153,16 @@ struct CSVReader {
     static func readValue(_ data: UnsafeRawBufferPointer, _ context: inout ReaderContext, _ row: inout [CSVValue?]) {
         
         var spec : FormatSpecifier? = nil
-        if !context.config.format.isEmpty,  context.valueIndex < context.config.format.count{
+        if !context.ignoreFormat, !context.config.format.isEmpty,  context.valueIndex < context.config.format.count{
             spec = context.config.format[context.valueIndex]
         }
         
-        var start = context.valueStart
-        var end = context.valueEnd
+        let start = context.valueStart
+        let end = context.valueEnd
         
+        // we hit an empty value aka ",,"
         if start == end {
             return row.append(nil)
-        }
-        
-        if let escaped = context.config.enclose {
-            if data[start] == escaped { start += 1 }
-            if data[end-1] == escaped { end -= 1 }
         }
         
         // now parse the value
@@ -210,7 +221,7 @@ struct CSVReader {
         guard let string = String(data: Data(record), encoding: .ascii) else {
             return nil
         }
-        
+
         let formatter = format ?? {
             let fallback = NumberFormatter()
             fallback.allowsFloats = true
