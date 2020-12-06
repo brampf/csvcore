@@ -1,7 +1,7 @@
 import XCTest
 
-import CSVCoreTests
+import CSVTests
 
 var tests = [XCTestCaseEntry]()
-tests += CSVCoreTests.allTests()
+tests += CSVTests.allTests()
 XCTMain(tests)

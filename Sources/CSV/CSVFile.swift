@@ -23,10 +23,10 @@
  */
 import Foundation
 
-struct CSVFile {
+public struct CSVFile {
     
-    var header : [String] = []
-    var rows : [[CSVValue?]] = []
+    public var header : [String] = []
+    public var rows : [[CSVValue?]] = []
     
 }
 

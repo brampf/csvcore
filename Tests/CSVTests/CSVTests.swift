@@ -1,15 +1,15 @@
 import XCTest
-@testable import CSV
+import CSV
 
 final class CSVCoreTests: XCTestCase {
 
     static var allTests = [
-        ("test0001", test0001),
-        ("test0002", test0002),
-        ("test0002", test0003)
+        ("test_file_0001", test_file_0001),
+        ("test_file_0002", test_file_0002),
+        ("test_file_0003", test_file_0003)
     ]
     
-    func test0001() {
+    func test_file_0001() {
         
         let url = Bundle.module.url(forResource: "test0001", withExtension: "csv")!
             
@@ -41,7 +41,7 @@ final class CSVCoreTests: XCTestCase {
         
     }
     
-    func test0002() {
+    func test_file_0002() {
         
         let url = Bundle.module.url(forResource: "test0002", withExtension: "csv")!
         
@@ -62,7 +62,7 @@ final class CSVCoreTests: XCTestCase {
         
     }
     
-    func test0003() {
+    func test_file_0003() {
         
         let url = Bundle.module.url(forResource: "test0003", withExtension: "csv")!
         let data = try! Data(contentsOf: url)

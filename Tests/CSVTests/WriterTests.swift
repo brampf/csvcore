@@ -4,7 +4,8 @@ import XCTest
 final class WriterTests: XCTestCase {
     
     static var allTests = [
-        ("testWriteLine", testWriteLine)
+        ("testWriteLine", testWriteLine),
+        ("testWriteLines", testWriteLines)
     ]
  
     
