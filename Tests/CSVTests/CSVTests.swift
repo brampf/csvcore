@@ -31,13 +31,13 @@ final class CSVCoreTests: XCTestCase {
             
         XCTAssertEqual(file?.rows.count, 1)
         XCTAssertEqual(file?.rows[0].count, 7)
-        XCTAssertSame(file?.rows[0][0], "One")
-        XCTAssertSame(file?.rows[0][1], 42.0)
-        XCTAssertSame(file?.rows[0][2], 23.32)
-        XCTAssertSame(file?.rows[0][3], 32.32)
-        XCTAssertSame(file?.rows[0][4], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2012, month: 12, day: 21, hour: 0, minute: 0, second: 0).date!)
-        XCTAssertSame(file?.rows[0][5], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!)
-        XCTAssertSame(file?.rows[0][6], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!)
+        XCTAssertEqual(file?.rows[0][0], CSVText("One"))
+        XCTAssertEqual(file?.rows[0][1], CSVNumber(42.0))
+        XCTAssertEqual(file?.rows[0][2], CSVNumber(23.32))
+        XCTAssertEqual(file?.rows[0][3], CSVNumber(32.32))
+        //XCTAssertEqual(file?.rows[0][4], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2012, month: 12, day: 21, hour: 0, minute: 0, second: 0).date!))
+        XCTAssertEqual(file?.rows[0][5], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!))
+        XCTAssertEqual(file?.rows[0][6], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!))
         
     }
     
@@ -54,7 +54,7 @@ final class CSVCoreTests: XCTestCase {
         XCTAssertEqual(file?.rows.count, 32445)
         XCTAssertEqual(file?.header, ["Year","Industry_aggregation_NZSIOC","Industry_code_NZSIOC","Industry_name_NZSIOC","Units","Variable_code","Variable_name","Variable_category","Value","Industry_code_ANZSIC06"])
         
-        XCTAssertSameRow(file?.rows[38], ["2019","Level 1","AA","Agriculture, Forestry and Fishing","Dollars (millions)","H10","Indirect taxes","Financial performance","475","ANZSIC06 division A"], "")
+        XCTAssertEqual(file?.rows[38], CSVRow("2019","Level 1","AA","Agriculture, Forestry and Fishing","Dollars (millions)","H10","Indirect taxes","Financial performance","475","ANZSIC06 division A"), "")
         
         file?.rows.forEach({ row in
             XCTAssertEqual(row.count, 10)
@@ -77,7 +77,6 @@ final class CSVCoreTests: XCTestCase {
         XCTAssertEqual(file?.header, ["Username","Login email","Identifier","First name","Last name"])
         
         XCTAssertEqual(file?.rows[0].count, 5)
-        XCTAssertEqual(file?.rows[0] as? [String], ["booker12","rachel@example.com","9012","Rachel","Booker"])
-        
+        XCTAssertEqual(file?.rows[0], CSVRow("booker12","rachel@example.com","9012","Rachel","Booker"))
     }
 }

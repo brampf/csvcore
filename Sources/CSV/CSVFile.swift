@@ -26,14 +26,29 @@ import Foundation
 public struct CSVFile {
     
     public var header : [String] = []
-    public var rows : [[CSVValue?]] = []
+    public var rows : [CSVRow] = []
     
     /**
      Initializer
      */
-    public init(header: [String] = [], rows: [[CSVValue?]] = []) {
+    public init() {
+        //
+    }
+    
+    /**
+     Initializer
+     */
+    public init(header: [String] = [], rows: [CSVRow] = []) {
         self.header = header
         self.rows = rows
+    }
+    
+    /**
+     Initializer
+     */
+    public init(header: [String] = [], _ literals: [[CSVLiteral?]] = []) {
+        self.header = header
+        self.rows = literals.csv
     }
 }
 
@@ -73,4 +88,3 @@ extension CSVFile {
     }
     
 }
-

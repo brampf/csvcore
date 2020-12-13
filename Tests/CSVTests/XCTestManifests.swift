@@ -15,19 +15,18 @@ public func allTests() -> [XCTestCaseEntry] {
 func XCTAssertSame<Val: CSVValue>(_ lhs: CSVValue?, _ rhs: Val?, file: StaticString = #file, line: UInt = #line){
     
     if let lhs = lhs as? Val , let rhs = rhs {
-        XCTAssertTrue(lhs.equals(rhs), "\(String(describing: lhs)) is not the same as \(String(describing: rhs))", file: file, line: line)
+        XCTAssertTrue(lhs == rhs, "\(String(describing: lhs)) is not the same as \(String(describing: rhs))", file: file, line: line)
     } else if rhs == nil && lhs == nil {
         // alright then
     } else {
         XCTFail("\(String(describing: lhs)) is not the same as \(String(describing: rhs))", file: file, line: line)
     }
-    
 }
 
 func XCTAssertSame<Val: CSVValue>(_ lhs: CSVValue?, _ rhs: Val?, _ message: String, file: StaticString = #file, line: UInt = #line){
     
     if let lhs = lhs as? Val, let rhs = rhs {
-        XCTAssertTrue(lhs.equals(rhs), message, file: file, line: line)
+        XCTAssertTrue(lhs == rhs, message, file: file, line: line)
     } else if rhs == nil && lhs == nil {
         // alright then
     } else {
@@ -36,7 +35,7 @@ func XCTAssertSame<Val: CSVValue>(_ lhs: CSVValue?, _ rhs: Val?, _ message: Stri
     
 }
 
-func XCTAssertSameRow(_ lhs: [CSVValue?]?, _ rhs: [CSVValue?], _ message: String, file: StaticString = #file, line: UInt = #line){
+func XCTAssertSameRow(_ lhs: CSVRow?, _ rhs: CSVRow, _ message: String, file: StaticString = #file, line: UInt = #line){
     
     guard lhs?.count == rhs.count else {
         XCTFail(message+" \(String(describing: lhs)) is not equal to \(rhs)")
@@ -53,13 +52,13 @@ func XCTAssertSameRow(_ lhs: [CSVValue?]?, _ rhs: [CSVValue?], _ message: String
             XCTFail(message+" \(String(describing: lhs)) is not equal to \(rhs)", file: file, line: line)
             return
         }
-        if let l = lhs?[idx] as? String, let r = rhs[idx] as? String{
+        if let l = lhs?[idx] as? CSVText, let r = rhs[idx] as? CSVText{
             XCTAssertSame(l, r, file: file, line: line)
         }
-        if let l = lhs?[idx] as? Double, let r = rhs[idx] as? Double{
+        if let l = lhs?[idx] as? CSVNumber, let r = rhs[idx] as? CSVNumber{
             XCTAssertSame(l, r, file: file, line: line)
         }
-        if let l = lhs?[idx] as? Date, let r = rhs[idx] as? Date{
+        if let l = lhs?[idx] as? CSVDate, let r = rhs[idx] as? CSVDate{
             XCTAssertSame(l, r, file: file, line: line)
         }
 
@@ -67,7 +66,7 @@ func XCTAssertSameRow(_ lhs: [CSVValue?]?, _ rhs: [CSVValue?], _ message: String
     
 }
 
-func XCTAssertSame(_ in: String, _ config: CSVConfig = CSVConfig(), _ out: [[CSVValue?]], _ message: String? = nil, file: StaticString = #file, line: UInt = #line){
+func XCTAssertSame(_ in: String, _ config: CSVConfig = CSVConfig(), _ out: [[CSVLiteral?]], _ message: String? = nil, file: StaticString = #file, line: UInt = #line){
     
     var context = ReaderContext(config: config)
     context.skipHead = true
@@ -83,7 +82,7 @@ func XCTAssertSame(_ in: String, _ config: CSVConfig = CSVConfig(), _ out: [[CSV
     }
     
     for idx in 0..<(parsed?.rows.count ?? 0){
-        XCTAssertSameRow(parsed?.rows[idx], out[idx], "Row \(idx) differs:", file: file, line: line)
+        XCTAssertSameRow(parsed?.rows[idx], CSVRow(out[idx]), "Row \(idx) differs:", file: file, line: line)
         
     }
     

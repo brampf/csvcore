@@ -11,7 +11,7 @@ final class WriterTests: XCTestCase {
     
     func testWriteLine() {
         
-        let file = CSVFile(header: ["One","Two","Three"], rows: [["First",23.32,Date(timeIntervalSince1970: 300000)],["Second", 42,Date(timeIntervalSince1970: 0) ]])
+        let file = CSVFile(header: ["One","Two","Three"], [["First",23.32,Date(timeIntervalSince1970: 300000)],["Second", 42,Date(timeIntervalSince1970: 0) ]])
         
         let config = CSVConfig()
         
@@ -19,12 +19,12 @@ final class WriterTests: XCTestCase {
         try! file.write(to: &data, config: config)
         
         let result = String(data: data, encoding: .utf8)
-        XCTAssertEqual(result, "\"One\",\"Two\",\"Three\"\n\"First\",\"23.32\",\"\(Date(timeIntervalSince1970: 300000).debugDescription)\"\n\"Second\",\"42\",\"\(Date(timeIntervalSince1970: 0).debugDescription)\"")
+        XCTAssertEqual(result, "\"One\",\"Two\",\"Three\"\n\"First\",\"23.32\",\"\(Date(timeIntervalSince1970: 300000).debugDescription)\"\n\"Second\",\"42.0\",\"\(Date(timeIntervalSince1970: 0).debugDescription)\"")
     }
     
     func testWriteLines() {
         
-        let file = CSVFile(header: [], rows: [[11,12],[21,22],[31,32]])
+        let file = CSVFile(header: [], [[11,12],[21,22],[31,32]])
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .spellOut

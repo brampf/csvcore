@@ -24,91 +24,164 @@
 
 import Foundation
 
-public protocol CSVValue : CustomStringConvertible {
+/**
+ Wrapper for CSVLiteral types 
+ */
+public class CSVValue : Identifiable, Hashable, Equatable, CustomStringConvertible, CustomDebugStringConvertible {
     
-    var hashValue: Int {get}
+    /// value id to distinguish two `CSVValue` objects with the same value
+    public var id : Int {
+        unsafeBitCast(self, to: Int.self)
+    }
     
-}
-
-extension String : CSVValue {
-
-}
-
-extension Date : CSVValue {
-    
-}
-
-extension Double : CSVValue {
-    
-}
-
-extension Int : CSVValue {
-    
-}
-
-
-extension CSVValue {
-    
-    public static func != (_ lhs: Self,_ rhs: Self) -> Bool {
-        
-        return !(lhs == rhs)
+    internal init() {
         
     }
     
-    public static func == (_ lhs: Self,_ rhs: Self) -> Bool {
-
-        return lhs.equals(rhs)
+    public var description: String {
+        return "CSVValue"
     }
     
-    public func equals<Val: CSVValue>(_ rhs: Val) -> Bool {
+    public var debugDescription: String {
+        return String(format: "%p", id)
+    }
+    
+    /**
+     Hashes the id
+     */
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    /**
+     Compares the value
+     */
+    public static func == (lhs: CSVValue, rhs: CSVValue) -> Bool {
         
-        if let l = self as? String, let r = rhs as? String {
-            return l == r
+        if let l = lhs as? CSVText, let r = rhs as? CSVText {
+            return l.val == r.val
         }
         
-        if let l = self as? Date, let r = rhs as? Date {
-            return l == r
+        if let l = lhs as? CSVNumber, let r = rhs as? CSVNumber {
+            return l.val == r.val
         }
         
-        if let l = self as? Double, let r = rhs as? Double {
-            return l == r
+        if let l = lhs as? CSVDate, let r = rhs as? CSVDate {
+            return l.val == r.val
         }
         
-        if let l = self as? Int, let r = rhs as? Int {
-            return l == r
+        return false
+    }
+    
+    /**
+     Compares the value
+     */
+    public static func == (lhs: CSVValue, rhs: CSVLiteral) -> Bool {
+        
+        if let l = lhs as? CSVText, let r = rhs as? String {
+            return l.val == r
+        }
+        
+        if let l = lhs as? CSVNumber, let r = rhs as? Double {
+            return l.val == r
+        }
+        
+        if let l = lhs as? CSVDate, let r = rhs as? Date {
+            return l.val == r
         }
         
         return false
     }
 }
 
-extension Optional where Wrapped == CSVValue {
+//MARK:- Equatable on Optional
+extension Optional where Wrapped : CSVValue {
     
-    public func equals<Val : CSVValue>(_ rhs : Val) -> Bool {
+    /**
+     Compares the value
+     */
+    public static func == <Literal: CSVLiteral>(lhs: Self, rhs: Literal?) -> Bool {
         
-        if let me = self {
-            return me.equals(rhs)
-        } else {
-            return false
+        if lhs == nil && rhs == nil {
+            return true
         }
+        
+        if let l = lhs as? CSVText, let r = rhs as? String {
+            return l.val == r
+        }
+        
+        if let l = lhs as? CSVNumber, let r = rhs as? Double {
+            return l.val == r
+        }
+        
+        if let l = lhs as? CSVDate, let r = rhs as? Date {
+            return l.val == r
+        }
+        
+        return false
     }
     
 }
 
-extension Array where Element: CSVValue {
+public final class CSVNumber : CSVValue, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
     
-    func equals(_ rhs: Self) -> Bool {
-        
-        guard self.count == rhs.count else {
-            return false
-        }
-        
-        for idx in 0..<self.count {
-            if !(self[idx] == rhs[idx]){
-                return false
-            }
-        }
-        return true
+    var val : Double
+    
+    public init(_ value: Double){
+        self.val = value
     }
     
+    public init(_ value: Int){
+        self.val = Double(value)
+    }
+    
+    public init(floatLiteral value: Double) {
+        self.val = value
+    }
+    
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.val = Double(value)
+    }
+    
+    override public var description: String {
+        return val.description
+    }
+}
+
+public final class CSVText : CSVValue, ExpressibleByStringLiteral {
+    
+    var val : String
+    
+    public init(_ value: String){
+        self.val = value
+    }
+    
+    public init(stringLiteral value: StringLiteralType) {
+        self.val = value
+    }
+
+    override public var description: String {
+        return val.description
+    }
+}
+
+public final class CSVDate : CSVValue {
+    
+    var val : Date
+    
+    public init(_ value: Date) {
+        self.val = value
+    }
+    
+    public init?(_ from: DateComponents) {
+        if let date = from.date {
+            self.val = date
+        } else {
+            return nil
+        }
+    }
+    
+    override public var description: String {
+        return val.description
+    }
 }

@@ -33,8 +33,8 @@ struct CSVReader {
         // read head
         if !context.skipHead {
             context.ignoreFormat = true
-            if context.offset < data.endIndex, let head = self.readLine(data, context: &context) as? [String] {
-                new.header = head
+            if context.offset < data.endIndex, let head = self.readLine(data, context: &context) {
+                new.header = head.map{$0?.description ?? ""}
             }
             context.ignoreFormat = false
         }
@@ -49,9 +49,9 @@ struct CSVReader {
         return new
     }
     
-    static func readLine(_ data: UnsafeRawBufferPointer, context: inout ReaderContext) -> [CSVValue?]? {
+    static func readLine(_ data: UnsafeRawBufferPointer, context: inout ReaderContext) -> CSVRow? {
         
-        var row : [CSVValue?] = .init()
+        var row : CSVRow = .init()
         // local context
         context.valueIndex = 0
         context.valueStart = context.offset
@@ -150,7 +150,7 @@ struct CSVReader {
         }
     }
     
-    static func readValue(_ data: UnsafeRawBufferPointer, _ context: inout ReaderContext, _ row: inout [CSVValue?]) {
+    static func readValue(_ data: UnsafeRawBufferPointer, _ context: inout ReaderContext, _ row: inout CSVRow) {
         
         var spec : FormatSpecifier? = nil
         if !context.ignoreFormat, !context.config.format.isEmpty,  context.valueIndex < context.config.format.count{
@@ -188,35 +188,17 @@ struct CSVReader {
         context.valueStart = end
     }
     
-    static func readValue(_ record: Slice<UnsafeRawBufferPointer>, _ spec: FormatSpecifier?, _ context: inout ReaderContext) -> CSVValue? {
+    static func readText(_ record: Slice<UnsafeRawBufferPointer>, _ encoding: String.Encoding) -> CSVText? {
         
-        var start = record.startIndex
-        var end = record.endIndex
-        
-        if let escaped = context.config.enclose {
-            if record.first == escaped { start += 1 }
-            if record.last == escaped { end -= 1 }
+        if let string = String(data: Data(record), encoding: encoding) {
+            return CSVText(string)
+        } else {
+            return nil
         }
-        
-        switch spec {
-        case .Text(let encoding):
-            return self.readText(record[start..<end], encoding)
-        case .Number(let format):
-            return self.readNumber(record[start..<end], format)
-        case .Date(let format):
-            return self.readDate(record[start..<end], format)
-        default:
-            return self.readText(record[start..<end], .utf8)
-        }
-    }
-    
-    static func readText(_ record: Slice<UnsafeRawBufferPointer>, _ encoding: String.Encoding) -> String? {
-        
-        return String(data: Data(record), encoding: encoding)
     }
     
     /// read a number
-    static func readNumber(_ record: Slice<UnsafeRawBufferPointer>, _ format: NumberFormatter?) -> Double? {
+    static func readNumber(_ record: Slice<UnsafeRawBufferPointer>, _ format: NumberFormatter?) -> CSVNumber? {
         
         guard let string = String(data: Data(record), encoding: .ascii) else {
             return nil
@@ -229,11 +211,15 @@ struct CSVReader {
             return fallback
         }()
         
-        return formatter.number(from: string)?.doubleValue
+        if let number = formatter.number(from: string)?.doubleValue {
+            return CSVNumber(number)
+        } else {
+            return nil
+        }
     }
     
     /// read a date
-    static func readDate(_ record: Slice<UnsafeRawBufferPointer>, _ format: DateFormatter?) -> Date? {
+    static func readDate(_ record: Slice<UnsafeRawBufferPointer>, _ format: DateFormatter?) -> CSVDate? {
         
         guard let string = String(data: Data(record), encoding: .ascii) else {
             return nil
@@ -246,7 +232,11 @@ struct CSVReader {
             return fallback
         }()
         
-        return formatter.date(from: string)
+        if let date = formatter.date(from: string){
+            return CSVDate(date)
+        } else {
+            return nil
+        }
     }
 }
 

@@ -7,7 +7,6 @@ final class ReaderTests: XCTestCase {
         ("testReadString", testReadString),
         ("testReadNumber", testReadNumber),
         ("testReadDate", testReadDate),
-        ("testReadValue", testReadValue),
         ("testReadLines", testReadLines),
         ("testReadLines2", testReadLines2),
         ("testReadLines3", testReadLines3),
@@ -65,68 +64,32 @@ final class ReaderTests: XCTestCase {
         XCTAssertEqual(accounting, -100000)
     }
     
-    func testReadValue() {
-        
-        let config = CSVConfig()
-        var context = ReaderContext(config: config)
-        
-        let test1 = "Hello World".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readValue(ptr.suffix(from: 0), nil, &context)
-        })
-        
-        XCTAssertSame(test1, "Hello World")
-        
-        let test2 = "\"Hello World\"".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readValue(ptr.suffix(from: 0), nil, &context)
-        })
-        
-        XCTAssertSame(test2, "Hello World")
-        
-        let formatter = NumberFormatter()
-        formatter.groupingSize = 3
-        formatter.usesGroupingSeparator = true
-        formatter.groupingSeparator = "."
-        formatter.decimalSeparator = ","
-        
-        let test3 = "\"-100.000,00\"".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readValue(ptr.suffix(from: 0), FormatSpecifier.Number(format: formatter), &context)
-        })
-        
-        XCTAssertSame(test3, -100000.0)
-        
-        let test4 = "\"43,43\"".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readValue(ptr.suffix(from: 0), FormatSpecifier.Number(format: NumberFormatter(",")), &context)
-        })
-        
-        XCTAssertSame(test4, 43.43)
-    }
-    
     func testReadDate() {
         
         let date1 = "01.11.2020".data(using: .utf8)?.withUnsafeBytes({ ptr in
             CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("dd.MM.yyyy"))
         })
         
-        XCTAssertEqual(date1, DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 01, hour: 0, minute: 0, second: 0).date!)
+        XCTAssertEqual(date1, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 01, hour: 0, minute: 0, second: 0)))
         
         
         let date2 = "2020/11/02".data(using: .utf8)?.withUnsafeBytes({ ptr in
             CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("yyyy/MM/dd"))
         })
         
-        XCTAssertEqual(date2, DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!)
+        XCTAssertEqual(date2, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0)))
         
         let date3 = "2020-11-03".data(using: .utf8)?.withUnsafeBytes({ ptr in
             CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("yyyy-MM-dd"))
         })
         
-        XCTAssertEqual(date3, DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!)
+        XCTAssertEqual(date3, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0)))
         
         let date4 = "2020-11-04T10:45:00+0000".data(using: .utf8)?.withUnsafeBytes({ ptr in
             CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("yyyy-MM-dd'T'HH:mm:ssZZZ"))
         })
         
-        XCTAssertEqual(date4, DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 04, hour: 10, minute: 45, second: 0).date!)
+        XCTAssertEqual(date4, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 04, hour: 10, minute: 45, second: 0)))
     }
     
     func testReadLines() {
@@ -250,15 +213,13 @@ final class ReaderTests: XCTestCase {
             CSVReader.readLine(ptr, context: &context)
         })
         
-        
-        
         XCTAssertEqual(result1?.count, 6)
-        XCTAssertSame(result1?[0], "Test")
-        XCTAssertSame(result1?[1], "42")
-        XCTAssertSame(result1?[2], 23.43)
-        XCTAssertSame(result1?[3], -100000.0)
-        XCTAssertSame(result1?[4], "Hello, World")
-        XCTAssertSame(result1?[5], DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 12, day: 31, hour: 0, minute: 0, second: 0).date!)
+        XCTAssertEqual(result1?[0], CSVText("Test"))
+        XCTAssertEqual(result1?[1], CSVText("42"))
+        XCTAssertEqual(result1?[2], CSVNumber(23.43))
+        XCTAssertEqual(result1?[3], CSVNumber(-100000.0))
+        XCTAssertEqual(result1?[4], CSVText("Hello, World"))
+        XCTAssertEqual(result1?[5], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 12, day: 31, hour: 0, minute: 0, second: 0)))
         
         
     }

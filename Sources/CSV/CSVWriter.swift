@@ -50,7 +50,7 @@ extension CSVFile {
     public func writeHead(to: inout Data, config: CSVConfig) throws {
         
         for idx in 0..<header.count {
-            self.writeValue(header[idx], to: &to, config: config, spec: FormatSpecifier.Text(encoding: .utf8))
+            self.writeValue(CSVText(stringLiteral: header[idx]), to: &to, config: config, spec: FormatSpecifier.Text(encoding: .utf8))
             
             if idx < header.count-1 {
                 to.append(config.delimiter)
@@ -107,23 +107,19 @@ extension CSVFile {
         
         switch spec {
         case .Date(let format):
-            if let date = val as? Date {
+            if let date = val as? CSVDate {
                 self.writeDate(date, to: &to, format: format)
             }
             
         case .Number(let format):
-            if let number = val as? Double {
+            if let number = val as? CSVNumber {
                 self.writeNumber(number, to: &to, format: format)
             }
-            if let number = val as? Int {
-                self.writeNumber(number, to: &to, format: format)
-            }
-            
             
         case .Text(let encoding):
-            
-            let string = val as? String ?? String(describing: val)
-            self.writeText(string, to: &to, encoding: encoding)
+            if let text = val as? CSVText {
+                self.writeText(text, to: &to, encoding: encoding)
+            }
             
         case .none:
             to.append(val?.description ?? "")
@@ -135,11 +131,11 @@ extension CSVFile {
         }
     }
     
-    public func writeNumber(_ number: Double, to: inout Data, format: NumberFormatter?) {
+    public func writeNumber(_ number: CSVNumber, to: inout Data, format: NumberFormatter?) {
         
         var string : String? = nil
         if let formatter = format {
-            string = formatter.string(for: number) ?? ""
+            string = formatter.string(for: number.val) ?? ""
         } else {
             string = number.description
         }
@@ -149,25 +145,11 @@ extension CSVFile {
         })
     }
     
-    public func writeNumber(_ number: Int, to: inout Data, format: NumberFormatter?) {
+    public func writeDate(_ date: CSVDate, to: inout Data, format: DateFormatter?) {
         
         var string : String? = nil
         if let formatter = format {
-            string = formatter.string(for: number) ?? ""
-        } else {
-            string = number.description
-        }
-        
-        string?.withUTF8({ ptr in
-            to.append(ptr)
-        })
-    }
-    
-    public func writeDate(_ date: Date, to: inout Data, format: DateFormatter?) {
-        
-        var string : String? = nil
-        if let formatter = format {
-            string = formatter.string(for: date) ?? ""
+            string = formatter.string(for: date.val) ?? ""
         } else {
             string = date.description
         }
@@ -177,9 +159,9 @@ extension CSVFile {
         })
     }
     
-    public func writeText(_ text: String, to: inout Data, encoding: String.Encoding?) {
+    public func writeText(_ text: CSVText, to: inout Data, encoding: String.Encoding?) {
         
-        if let dat = text.data(using: encoding ?? .utf8) {
+        if let dat = text.val.data(using: encoding ?? .utf8) {
             to.append( dat)
         }
     }
