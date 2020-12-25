@@ -5,7 +5,8 @@ public func allTests() -> [XCTestCaseEntry] {
     return [
         testCase(CSVCoreTests.allTests),
         testCase(ReaderTests.allTests),
-        testCase(WriterTests.allTests)
+        testCase(WriterTests.allTests),
+        testCase(CSVFileTests.allTests),
     ]
 }
 #endif
@@ -69,7 +70,7 @@ func XCTAssertSameRow(_ lhs: CSVRow?, _ rhs: CSVRow, _ message: String, file: St
 func XCTAssertSame(_ in: String, _ config: CSVConfig = CSVConfig(), _ out: [[CSVLiteral?]], _ message: String? = nil, file: StaticString = #file, line: UInt = #line){
     
     var context = ReaderContext(config: config)
-    context.skipHead = true
+    context.ignoreHead = true
     let parsed = `in`.data(using: .utf8)?.withUnsafeBytes({ ptr in
         CSVReader.read(ptr, context: &context)
     })

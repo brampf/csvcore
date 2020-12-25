@@ -23,22 +23,31 @@
  */
 import Foundation
 
+/**
+ Parser implementation
+ */
 struct CSVReader {
     
+    /**
+     Parse `CSVFile` from raw data
+     
+     - Parameters:
+        - data: Buffered pointer to the data
+        - context: The `ReaderContext` to read the data
+     */
     static func read(_ data: UnsafeRawBufferPointer, context: inout ReaderContext) -> CSVFile? {
         
         var new = CSVFile()
         
         
         // read head
-        if !context.skipHead {
+        if !context.ignoreHead {
             context.ignoreFormat = true
             if context.offset < data.endIndex, let head = self.readLine(data, context: &context) {
                 new.header = head.map{$0?.description ?? ""}
             }
             context.ignoreFormat = false
         }
-        
         
         // read the file line by line until there is no more to read
         while context.offset < data.endIndex, let values = self.readLine(data, context: &context){
@@ -49,6 +58,13 @@ struct CSVReader {
         return new
     }
     
+    /**
+     Parse `CSVRow` from raw data
+     
+     - Parameters:
+        - data: Buffered pointer to the data
+        - context: The `ReaderContext` to read the data
+     */
     static func readLine(_ data: UnsafeRawBufferPointer, context: inout ReaderContext) -> CSVRow? {
         
         var row : CSVRow = .init()
@@ -150,6 +166,14 @@ struct CSVReader {
         }
     }
     
+    /**
+     Parse `CSVValue` from raw data
+     
+     - Parameters:
+        - data: Buffered pointer to the data
+        - context: The `ReaderContext` to read the data
+        - row: The `CSVRow` currently read
+     */
     static func readValue(_ data: UnsafeRawBufferPointer, _ context: inout ReaderContext, _ row: inout CSVRow) {
         
         var spec : FormatSpecifier? = nil
@@ -188,6 +212,13 @@ struct CSVReader {
         context.valueStart = end
     }
     
+    /**
+     Parse `CSVText` from raw data
+     
+     - Parameters:
+        - record: the bounded section of raw data to read
+        - encoding: the text encoding to use
+     */
     static func readText(_ record: Slice<UnsafeRawBufferPointer>, _ encoding: String.Encoding) -> CSVText? {
         
         if let string = String(data: Data(record), encoding: encoding) {
@@ -197,7 +228,13 @@ struct CSVReader {
         }
     }
     
-    /// read a number
+    /**
+     Parse `CSVNumber` from raw data
+     
+     - Parameters:
+        - record: the bounded section of raw data to read
+        - format: the `NumberFormatter`  to use in order to parse  the number value
+     */
     static func readNumber(_ record: Slice<UnsafeRawBufferPointer>, _ format: NumberFormatter?) -> CSVNumber? {
         
         guard let string = String(data: Data(record), encoding: .ascii) else {
@@ -218,7 +255,13 @@ struct CSVReader {
         }
     }
     
-    /// read a date
+    /**
+     Parse `CSVDate` from raw data
+     
+     - Parameters:
+        - record: the bounded section of raw data to read
+        - format: the `DateFormatter`  to use in order to parse  the date
+     */
     static func readDate(_ record: Slice<UnsafeRawBufferPointer>, _ format: DateFormatter?) -> CSVDate? {
         
         guard let string = String(data: Data(record), encoding: .ascii) else {

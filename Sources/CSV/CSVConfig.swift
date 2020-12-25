@@ -58,7 +58,7 @@ public enum FormatSpecifier {
 }
 
 /// Newline
-public enum EOL : CaseIterable {
+public enum EOL : CaseIterable, CustomStringConvertible {
 
     /// *nix
     case LF
@@ -71,6 +71,21 @@ public enum EOL : CaseIterable {
     
     /// IBM
     case NL
+    
+    public var description: String {
+        
+        switch self {
+        case .LF:
+            return "LF"
+        case .CR:
+            return "CR"
+        case .CR_LF:
+            return "CR LF"
+        case .NL:
+            return "NL"
+        }
+        
+    }
 }
 
 extension DateFormatter {

@@ -24,16 +24,20 @@
 
 import Foundation
 
+/// Parser context information
 struct ReaderContext {
     
+    /// `CSVConfig` to use
     let config : CSVConfig
     
-    var lineLimit : Int? = 0
-    var skipHead = false
-    
+    /// Data Pointer
     internal var offset = 0
+    /// Format overwrite (will always parse as `CSVText`
     internal var ignoreFormat = false
+    /// do not parse the header
+    internal var ignoreHead = false
     
+    /// context for value parsing
     internal var valueIndex: Int = 0
     internal var valueStart: Int = 0
     internal var valueEnd: Int = 0

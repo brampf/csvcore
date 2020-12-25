@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// A row in the CSV File
 public typealias CSVRow = [CSVValue?]
 
 extension CSVRow {

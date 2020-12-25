@@ -123,6 +123,7 @@ extension Optional where Wrapped : CSVValue {
     
 }
 
+/// Wrapper class to distinguish two different number literals even if they are the same value
 public final class CSVNumber : CSVValue, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
     
     var val : Double
@@ -148,6 +149,7 @@ public final class CSVNumber : CSVValue, ExpressibleByFloatLiteral, ExpressibleB
     }
 }
 
+/// Wrapper class to distinguish two different string literals even if they are the same value
 public final class CSVText : CSVValue, ExpressibleByStringLiteral {
     
     var val : String
@@ -165,6 +167,7 @@ public final class CSVText : CSVValue, ExpressibleByStringLiteral {
     }
 }
 
+/// Wrapper class to distinguish two different date literals even if they are the same date
 public final class CSVDate : CSVValue {
     
     var val : Date

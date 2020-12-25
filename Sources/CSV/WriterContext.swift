@@ -24,7 +24,9 @@
 
 import Foundation
 
+/// Writer context
 public struct WriterContext {
     
+    /// `CSVConfig` to use
     public let config : CSVConfig
 }

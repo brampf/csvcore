@@ -4,7 +4,8 @@ import CSV
 final class CSVFileTests: XCTestCase {
     
     static var allTests = [
-        ("testRowCount", testRowCount)
+        ("testRowCount", testRowCount),
+        ("testIsIrregular", testIsIrregular)
     ]
 
     func testRowCount() {

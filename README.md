@@ -1,4 +1,6 @@
-# CSVCore
+<p align="center">
+<img src = "Doc/CSVBanner@0.5x.png" alt="CSVCore">
+</p>
 
 <p align="center">
 <a href="LICENSE.md">
