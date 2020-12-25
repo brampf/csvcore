@@ -26,7 +26,30 @@ import Foundation
 public struct CSVFile {
     
     public var header : [String] = []
-    public var rows : [CSVRow] = []
+    {
+        didSet {
+            let old = maxRowCount
+            maxRowCount = header.count != maxRowCount ? header.count : maxRowCount
+            isIrregular = old > 0 && old != maxRowCount
+        }
+    }
+    
+    public var rows : [CSVRow] = [] {
+        didSet {
+            let old = maxRowCount
+            
+            maxRowCount = rows.reduce(into: 0, { maximum, row in
+                let len = row.count
+                maximum = max(len,maximum)
+            })
+            
+            isIrregular = old > 0 && old != maxRowCount
+        }
+    }
+    
+    public var maxRowCount : Int = 0
+    
+    public var isIrregular : Bool = false
     
     /**
      Initializer
@@ -52,6 +75,7 @@ public struct CSVFile {
     }
 }
 
+//MARK:- CSVReader
 extension CSVFile {
     
     /**
