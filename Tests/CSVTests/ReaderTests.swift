@@ -18,13 +18,13 @@ final class ReaderTests: XCTestCase {
     func testReadString() {
         
         let string1 = "Hello World".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readText(ptr.suffix(from: 0), .utf8)
+            CSVText(ptr.suffix(from: 0), with: .utf8)
         })
         
         XCTAssertEqual(string1, "Hello World")
         
         let string2 = "Hello, World".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readText(ptr.suffix(from: 0), .utf8)
+            CSVText(ptr.suffix(from: 0), with: .utf8)
         })
         
         XCTAssertEqual(string2, "Hello, World")
@@ -33,20 +33,20 @@ final class ReaderTests: XCTestCase {
     func testReadNumber() {
         
         let integer = "42".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readNumber(ptr.suffix(from: 0), nil)
+            CSVNumber(ptr.suffix(from: 0), with: nil)
         })
         
         XCTAssertEqual(integer, 42)
      
         
         let float_dot = "32.32".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readNumber(ptr.suffix(from: 0), nil)
+            CSVNumber(ptr.suffix(from: 0), with: nil)
         })
         
         XCTAssertEqual(float_dot, 32.32)
         
         let float_comma = "23,23".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readNumber(ptr.suffix(from: 0), NumberFormatter(","))
+            CSVNumber(ptr.suffix(from: 0), with: NumberFormatter(","))
         })
         
         XCTAssertEqual(float_comma, 23.23)
@@ -58,7 +58,7 @@ final class ReaderTests: XCTestCase {
         formatter.decimalSeparator = ","
         
         let accounting = "-100.000,00".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readNumber(ptr.suffix(from: 0), formatter)
+            CSVNumber(ptr.suffix(from: 0), with: formatter)
         })
         
         XCTAssertEqual(accounting, -100000)
@@ -67,26 +67,26 @@ final class ReaderTests: XCTestCase {
     func testReadDate() {
         
         let date1 = "01.11.2020".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("dd.MM.yyyy"))
+            CSVDate(ptr.suffix(from: 0), with: DateFormatter("dd.MM.yyyy"))
         })
         
         XCTAssertEqual(date1, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 01, hour: 0, minute: 0, second: 0)))
         
         
         let date2 = "2020/11/02".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("yyyy/MM/dd"))
+            CSVDate(ptr.suffix(from: 0), with: DateFormatter("yyyy/MM/dd"))
         })
         
         XCTAssertEqual(date2, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0)))
         
         let date3 = "2020-11-03".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("yyyy-MM-dd"))
+            CSVDate( ptr.suffix(from: 0), with: DateFormatter("yyyy-MM-dd"))
         })
         
         XCTAssertEqual(date3, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0)))
         
         let date4 = "2020-11-04T10:45:00+0000".data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readDate(ptr.suffix(from: 0), DateFormatter("yyyy-MM-dd'T'HH:mm:ssZZZ"))
+            CSVDate(ptr.suffix(from: 0), with: DateFormatter("yyyy-MM-dd'T'HH:mm:ssZZZ"))
         })
         
         XCTAssertEqual(date4, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 04, hour: 10, minute: 45, second: 0)))
@@ -207,10 +207,10 @@ final class ReaderTests: XCTestCase {
         ]
         
         
-        var context = ReaderContext(config: config)
+        var context = CSVReaderContext(using: config)
         
         let result1 = line1.data(using: .utf8)?.withUnsafeBytes({ ptr in
-            CSVReader.readLine(ptr, context: &context)
+            CSVRow(ptr, context: &context)
         })
         
         XCTAssertEqual(result1?.count, 6)

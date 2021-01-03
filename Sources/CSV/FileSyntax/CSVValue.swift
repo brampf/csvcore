@@ -27,7 +27,7 @@ import Foundation
 /**
  Wrapper for CSVLiteral types 
  */
-public class CSVValue : Identifiable, Hashable, Equatable, CustomStringConvertible, CustomDebugStringConvertible {
+public class CSVValue : Identifiable, Hashable, CustomStringConvertible, CustomDebugStringConvertible {
     
     /// value id to distinguish two `CSVValue` objects with the same value
     public var id : Int {
@@ -121,70 +121,4 @@ extension Optional where Wrapped : CSVValue {
         return false
     }
     
-}
-
-/// Wrapper class to distinguish two different number literals even if they are the same value
-public final class CSVNumber : CSVValue, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
-    
-    var val : Double
-    
-    public init(_ value: Double){
-        self.val = value
-    }
-    
-    public init(_ value: Int){
-        self.val = Double(value)
-    }
-    
-    public init(floatLiteral value: Double) {
-        self.val = value
-    }
-    
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.val = Double(value)
-    }
-    
-    override public var description: String {
-        return val.description
-    }
-}
-
-/// Wrapper class to distinguish two different string literals even if they are the same value
-public final class CSVText : CSVValue, ExpressibleByStringLiteral {
-    
-    var val : String
-    
-    public init(_ value: String){
-        self.val = value
-    }
-    
-    public init(stringLiteral value: StringLiteralType) {
-        self.val = value
-    }
-
-    override public var description: String {
-        return val.description
-    }
-}
-
-/// Wrapper class to distinguish two different date literals even if they are the same date
-public final class CSVDate : CSVValue {
-    
-    var val : Date
-    
-    public init(_ value: Date) {
-        self.val = value
-    }
-    
-    public init?(_ from: DateComponents) {
-        if let date = from.date {
-            self.val = date
-        } else {
-            return nil
-        }
-    }
-    
-    override public var description: String {
-        return val.description
-    }
 }

@@ -22,14 +22,28 @@
  
  */
 import Foundation
+import FileReader
 
-/**
- Parser implementation
- */
-struct CSVReader {
+extension CSVDate : Leaf {
+    public typealias Parameter = DateFormatter
     
-
-    
-
+    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: DateFormatter?) {
+        
+        guard let string = String(data: Data(data), encoding: .ascii) else {
+            return nil
+        }
+        
+        let formatter = parameter ?? {
+            let fallback = DateFormatter()
+            fallback.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
+            fallback.timeZone = TimeZone(secondsFromGMT: 0)
+            return fallback
+        }()
+        
+        if let date = formatter.date(from: string){
+            self.init(date)
+        } else {
+            return nil
+        }
+    }
 }
-

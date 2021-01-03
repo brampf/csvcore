@@ -21,15 +21,36 @@
  SOFTWARE.
  
  */
+
 import Foundation
 
-/**
- Parser implementation
- */
-struct CSVReader {
-    
 
+/// Wrapper class to distinguish two different number literals even if they are the same value
+public final class CSVNumber : CSVValue {
     
+    var val : Double
+    
+    init(_ value: Double){
+        self.val = value
+    }
+    
+    init(_ value: Int){
+        self.val = Double(value)
+    }
 
+    override public var description: String {
+        return val.description
+    }
 }
 
+extension CSVNumber :  ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
+    
+    public convenience init(floatLiteral value: Double) {
+        self.init(value)
+    }
+    
+    public convenience init(integerLiteral value: IntegerLiteralType) {
+        self.init(value)
+    }
+    
+}

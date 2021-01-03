@@ -22,14 +22,30 @@
  
  */
 import Foundation
+import FileReader
 
-/**
- Parser implementation
- */
-struct CSVReader {
+extension CSVNumber : Leaf {
+    public typealias Parameter = NumberFormatter
     
-
+    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: NumberFormatter?) {
+        
+        guard let string = String(data: Data(data), encoding: .ascii) else {
+            return nil
+        }
+        
+        let formatter = parameter ?? {
+            let fallback = NumberFormatter()
+            fallback.allowsFloats = true
+            fallback.decimalSeparator = "."
+            return fallback
+        }()
+        
+        if let number = formatter.number(from: string)?.doubleValue {
+            self.init(number)
+        } else {
+            return nil
+        }
+    }
     
-
+    
 }
-

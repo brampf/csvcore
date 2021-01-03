@@ -22,14 +22,17 @@
  
  */
 import Foundation
+import FileReader
 
-/**
- Parser implementation
- */
-struct CSVReader {
+extension CSVText : Leaf {
+    public typealias  Parameter = String.Encoding
     
-
-    
-
+    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: String.Encoding?) throws  {
+        
+        if let string = String(data: Data(data), encoding: parameter ?? .utf8) {
+            self.init(string)
+        } else {
+            return nil
+        }
+    }
 }
-

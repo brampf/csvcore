@@ -23,15 +23,18 @@
  */
 
 import Foundation
+import FileReader
 
 /// Parser context information
-struct ReaderContext {
+public final class CSVReaderContext : ReaderContext {
+    public typealias Configuration = CSVConfig
     
-    /// `CSVConfig` to use
-    let config : CSVConfig
+    var config : CSVConfig
     
-    /// Data Pointer
-    internal var offset = 0
+    public internal(set) var offset: Int = 0
+    
+    public var notify: ((Output) -> Void)?
+    
     /// Format overwrite (will always parse as `CSVText`
     internal var ignoreFormat = false
     /// do not parse the header
@@ -42,11 +45,16 @@ struct ReaderContext {
     internal var valueStart: Int = 0
     internal var valueEnd: Int = 0
     
-    mutating func reset() {
+    func reset() {
         
         self.offset = 0
         self.valueIndex = 0
         self.valueStart = 0
         self.valueEnd = 0
+    }
+    
+    public init(using configuration: CSVConfig = .default, out: ((Output) -> Void)? = nil) {
+        self.config = configuration
+        self.notify = out
     }
 }

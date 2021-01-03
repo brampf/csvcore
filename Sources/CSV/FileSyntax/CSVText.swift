@@ -21,15 +21,26 @@
  SOFTWARE.
  
  */
+
 import Foundation
 
-/**
- Parser implementation
- */
-struct CSVReader {
+/// Wrapper class to distinguish two different string literals even if they are the same value
+public final class CSVText : CSVValue {
     
-
+    var val : String
     
-
+    public init(_ value: String){
+        self.val = value
+    }
+    
+    override public var description: String {
+        return val.description
+    }
 }
 
+extension CSVText : ExpressibleByStringLiteral {
+    
+    public convenience init(stringLiteral value: StringLiteralType) {
+        self.init(value)
+    }
+}

@@ -21,15 +21,27 @@
  SOFTWARE.
  
  */
+
 import Foundation
 
-/**
- Parser implementation
- */
-struct CSVReader {
+/// Wrapper class to distinguish two different date literals even if they are the same date
+public final class CSVDate : CSVValue {
     
-
+    var val : Date
     
-
+    public init(_ value: Date) {
+        self.val = value
+    }
+    
+    public init?(_ from: DateComponents) {
+        if let date = from.date {
+            self.val = date
+        } else {
+            return nil
+        }
+    }
+    
+    override public var description: String {
+        return val.description
+    }
 }
-

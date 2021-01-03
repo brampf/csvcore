@@ -1,5 +1,5 @@
 import XCTest
-import CSV
+@testable import CSV
 
 final class CSVCoreTests: XCTestCase {
 
@@ -24,7 +24,7 @@ final class CSVCoreTests: XCTestCase {
                               FormatSpecifier.Date(format: DateFormatter("yyyy/MM/dd")),
                               FormatSpecifier.Date(format: DateFormatter("yyyy-MM-dd")))
         
-        let file = try! CSVFile.read(contentsOf: url, config: config)
+        let file = try! CSVFile.read(contentsOf: url, using: config)
         
 
         XCTAssertEqual(file?.header, ["String","Number1","Number2","Number3","Date1","Date2","Date3"])
@@ -49,7 +49,7 @@ final class CSVCoreTests: XCTestCase {
         config.eol = .CR_LF
         config.delimiter = Character(",").asciiValue!
         
-        let file = try! CSVFile.read(contentsOf: url, config: config)
+        let file = try! CSVFile.read(contentsOf: url, using: config)
         
         XCTAssertEqual(file?.rows.count, 32445)
         XCTAssertEqual(file?.header, ["Year","Industry_aggregation_NZSIOC","Industry_code_NZSIOC","Industry_name_NZSIOC","Units","Variable_code","Variable_name","Variable_category","Value","Industry_code_ANZSIC06"])
@@ -71,7 +71,7 @@ final class CSVCoreTests: XCTestCase {
         config.eol = .LF
         config.delimiter = ";".utf8.map{$0}.first!
         
-        let file = CSVFile.read(data, config)
+        let file = try? CSVFile.read(data, config: config)
         
         XCTAssertEqual(file?.rows.count, 5)
         XCTAssertEqual(file?.header, ["Username","Login email","Identifier","First name","Last name"])

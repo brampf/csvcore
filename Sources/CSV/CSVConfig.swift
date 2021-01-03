@@ -23,11 +23,14 @@
  */
 
 import Foundation
+import FileReader
 
 /**
  Configuration of a CSV File
  */
-public struct CSVConfig {
+public struct CSVConfig : FileConfiguration {
+    
+    public static var `default`: CSVConfig = CSVConfig()
 
     public init() {
         //
