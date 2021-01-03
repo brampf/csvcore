@@ -27,7 +27,7 @@ import FileReader
 extension CSVDate : Leaf {
     public typealias Parameter = DateFormatter
     
-    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: DateFormatter?) {
+    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: DateFormatter?) throws {
         
         guard let string = String(data: Data(data), encoding: .ascii) else {
             return nil

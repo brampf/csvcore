@@ -27,7 +27,7 @@ import FileReader
 extension CSVNumber : Leaf {
     public typealias Parameter = NumberFormatter
     
-    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: NumberFormatter?) {
+    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: NumberFormatter?) throws {
         
         guard let string = String(data: Data(data), encoding: .ascii) else {
             return nil

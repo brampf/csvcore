@@ -37,7 +37,7 @@ extension CSVRow : Node {
      - data: Buffered pointer to the data
      - context: The `ReaderContext` to read the data
      */
-    public init?(_ data: UnsafeRawBufferPointer, context: inout CSVReaderContext) {
+    public init?(_ data: UnsafeRawBufferPointer, context: inout CSVReaderContext) throws {
         
         self.init()
         // local context
@@ -63,7 +63,7 @@ extension CSVRow : Node {
                 }
                 if char == context.config.delimiter {
                     // read value
-                    self.append(CSVValue.read(data, context: &context))
+                    self.append(try CSVValue.read(data, context: &context))
                     // skip over this character
                     context.valueStart += 1
                     if wasEnclosed {
@@ -74,7 +74,7 @@ extension CSVRow : Node {
                 }
                 if char == 0x0A && context.config.eol == .LF {
                     // read last value in row
-                    self.append(CSVValue.read(data, context: &context))
+                    self.append(try CSVValue.read(data, context: &context))
                     // skip over this character
                     context.valueStart += 1
                     // exit loop
@@ -82,7 +82,7 @@ extension CSVRow : Node {
                 }
                 if char == 0x0D && context.config.eol == .CR {
                     // read last value in row
-                    self.append(CSVValue.read(data, context: &context))
+                    self.append(try CSVValue.read(data, context: &context))
                     // skip over this character
                     context.valueStart += 1
                     // exit loop
@@ -90,7 +90,7 @@ extension CSVRow : Node {
                 }
                 if char == 0x15 && context.config.eol == .NL {
                     // read last value in row
-                    self.append(CSVValue.read(data, context: &context))
+                    self.append(try CSVValue.read(data, context: &context))
                     // skip over this character
                     context.valueStart += 1
                     // exit loop
@@ -103,7 +103,7 @@ extension CSVRow : Node {
                 if char == 0x0A && context.config.eol == .CR_LF && firstEOL {
                     context.valueEnd -= 1
                     // read last value in row
-                    self.append(CSVValue.read(data, context: &context))
+                    self.append(try CSVValue.read(data, context: &context))
                     // skip over this character
                     context.valueStart += 2
                     // exit loop
@@ -128,7 +128,7 @@ extension CSVRow : Node {
         }
         if !lineEnd {
             // there is still a value to read
-            self.append(CSVValue.read(data, context: &context))
+            self.append(try CSVValue.read(data, context: &context))
         }
         
         if self.compactMap({$0}).isEmpty {

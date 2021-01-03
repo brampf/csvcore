@@ -31,7 +31,7 @@ extension CSVValue : AbstractNode {
     public typealias Context = CSVReaderContext
     
     
-    public static func read(_ data: UnsafeRawBufferPointer, context: inout CSVReaderContext) -> Self? {
+    public static func read(_ data: UnsafeRawBufferPointer, context: inout CSVReaderContext) throws -> Self? {
         
         var spec : FormatSpecifier? = nil
         if !context.ignoreFormat, !context.config.format.isEmpty,  context.valueIndex < context.config.format.count{
@@ -50,14 +50,14 @@ extension CSVValue : AbstractNode {
         var value : CSVValue?
         switch spec {
         case .Text(let encoding):
-            value = CSVText(data[start..<end], with: encoding)
+            value = try CSVText(data[start..<end], with: encoding)
         case .Number(let format):
-            value = CSVNumber(data[start..<end], with: format)
+            value = try CSVNumber(data[start..<end], with: format)
         case .Date(let format):
-            value = CSVDate(data[start..<end], with: format)
+            value = try CSVDate(data[start..<end], with: format)
         case .none:
             // without context, we try to read text
-            value = CSVText(data[start..<end], with: .utf8)
+            value = try CSVText(data[start..<end], with: .utf8)
         }
         //print("\(start)...\(end); val \(context.valueIndex) = \(value.debugDescription)")
         

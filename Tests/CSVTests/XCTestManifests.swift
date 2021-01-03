@@ -72,7 +72,7 @@ func XCTAssertSame(_ in: String, _ config: CSVConfig = CSVConfig(), _ out: [[CSV
     var context = CSVReaderContext(using: config)
     context.ignoreHead = true
     let parsed = `in`.data(using: .utf8)?.withUnsafeBytes({ ptr in
-        CSVFile(ptr, context: &context)
+        try? CSVFile(ptr, context: &context)
     })
     
     XCTAssertEqual(parsed?.rows.count, out.count, "Number of rows mismatch: \(parsed?.rows.count ?? 0) is not equal to \(out.count)", file: file, line: line)
