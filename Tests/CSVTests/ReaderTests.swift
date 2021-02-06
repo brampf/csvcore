@@ -92,6 +92,22 @@ final class ReaderTests: XCTestCase {
         XCTAssertEqual(date4, CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 04, hour: 10, minute: 45, second: 0)))
     }
     
+    func testReadRow() throws {
+        
+        let data = "One,Two,Three".data(using: .utf8)!
+        
+        var context = CSVReaderContext()
+        let row = try data.withUnsafeBytes { ptr in
+            try CSVRow.readElement(ptr, with: &context, nil)
+        }
+        
+        XCTAssertNotNil(row)
+        XCTAssertEqual(row?.count, 3)
+        XCTAssertEqual(row, ["One","Two","Three"])
+        
+        XCTAssertEqual(context.offset, 13)
+    }
+    
     func testReadLines() {
         
         var config = CSVConfig()
@@ -207,10 +223,10 @@ final class ReaderTests: XCTestCase {
         ]
         
         
-        var context = CSVReaderContext(using: config)
+        var context = CSVReaderContext(using: config, out: nil)
         
         let result1 = line1.data(using: .utf8)?.withUnsafeBytes({ ptr in
-            try? CSVRow(ptr, context: &context)
+            try? CSVRow.readElement(ptr, with: &context, nil)
         })
         
         XCTAssertEqual(result1?.count, 6)

@@ -30,7 +30,9 @@ import FileReader
  */
 public struct CSVConfig : FileConfiguration {
     
-    public static var `default`: CSVConfig = CSVConfig()
+    public var bigEndian: Bool = false
+    
+    public var ignoreRecoverableErrors: Bool = true
 
     public init() {
         //

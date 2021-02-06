@@ -69,10 +69,10 @@ func XCTAssertSameRow(_ lhs: CSVRow?, _ rhs: CSVRow, _ message: String, file: St
 
 func XCTAssertSame(_ in: String, _ config: CSVConfig = CSVConfig(), _ out: [[CSVLiteral?]], _ message: String? = nil, file: StaticString = #file, line: UInt = #line){
     
-    var context = CSVReaderContext(using: config)
+    var context = CSVReaderContext(using: config, out: nil)
     context.ignoreHead = true
     let parsed = `in`.data(using: .utf8)?.withUnsafeBytes({ ptr in
-        try? CSVFile(ptr, context: &context)
+        try? CSVFile.readElement(ptr, with: &context, nil)
     })
     
     XCTAssertEqual(parsed?.rows.count, out.count, "Number of rows mismatch: \(parsed?.rows.count ?? 0) is not equal to \(out.count)", file: file, line: line)
@@ -83,8 +83,7 @@ func XCTAssertSame(_ in: String, _ config: CSVConfig = CSVConfig(), _ out: [[CSV
     }
     
     for idx in 0..<(parsed?.rows.count ?? 0){
-        XCTAssertSameRow(parsed?.rows[idx], CSVRow(out[idx]), "Row \(idx) differs:", file: file, line: line)
-        
+        XCTAssertEqual(parsed?.rows[idx], CSVRow(out[idx]), "Row \(idx) differs:", file: file, line: line)
     }
     
 }

@@ -24,7 +24,8 @@
 import Foundation
 import FileReader
 
-extension CSVNumber : Leaf {
+extension CSVNumber {
+    
     public typealias Parameter = NumberFormatter
     
     public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: NumberFormatter?) throws {

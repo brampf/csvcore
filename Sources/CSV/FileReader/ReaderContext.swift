@@ -26,14 +26,8 @@ import Foundation
 import FileReader
 
 /// Parser context information
-public final class CSVReaderContext : ReaderContext {
+public final class CSVReaderContext : ReaderContext<CSVConfig> {
     public typealias Configuration = CSVConfig
-    
-    var config : CSVConfig
-    
-    public internal(set) var offset: Int = 0
-    
-    public var notify: ((Output) -> Void)?
     
     /// Format overwrite (will always parse as `CSVText`
     internal var ignoreFormat = false
@@ -53,8 +47,11 @@ public final class CSVReaderContext : ReaderContext {
         self.valueEnd = 0
     }
     
-    public init(using configuration: CSVConfig = .default, out: ((Output) -> Void)? = nil) {
-        self.config = configuration
-        self.notify = out
+    public required init(using configuration: Configuration, out: ((Output) -> Void)? = nil){
+        super.init(using: configuration, out: out)
+    }
+    
+    public convenience init() {
+        self.init(using: CSVConfig(), out: nil)
     }
 }

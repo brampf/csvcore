@@ -64,6 +64,7 @@ extension CSVFile {
     /// writes the header
     func writeHead(to: inout Data, config: CSVConfig) throws {
         
+        /*
         for idx in 0..<header.count {
             self.writeValue(CSVText(stringLiteral: header[idx]), to: &to, config: config, spec: FormatSpecifier.Text(encoding: .utf8))
             
@@ -74,6 +75,7 @@ extension CSVFile {
         if !header.isEmpty{
             self.writeEOL(to: &to, config: config)
         }
+ */
     }
     
     /// writes the rows

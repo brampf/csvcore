@@ -53,8 +53,8 @@ final class CSVValueTests: XCTestCase {
     
     func testCSVRow() {
         
-        let row1 : CSVRow = [ CSVText("Test"), CSVNumber(32.32), CSVDate(Date())]
-        let row2 : CSVRow = [ CSVText("Test"), CSVNumber(32.32), CSVDate(Date())]
+        let row1 : CSVRow = [ "Test", 32.32, Date()]
+        let row2 : CSVRow = [ "Test", 32.32, Date()]
         let row3 : CSVRow = [nil, nil, nil]
         let row4 : CSVRow = [nil, nil, nil]
         

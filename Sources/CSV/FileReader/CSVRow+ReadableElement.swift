@@ -24,26 +24,20 @@
 import Foundation
 import FileReader
 
-extension CSVRow : Node {
-    
-    public typealias Configuration = CSVConfig
-    public typealias Context = CSVReaderContext
-    
-    
-    /**
-     Parse `CSVRow` from raw data
-     
-     - Parameters:
-     - data: Buffered pointer to the data
-     - context: The `ReaderContext` to read the data
-     */
-    public init?(_ data: UnsafeRawBufferPointer, context: inout CSVReaderContext) throws {
+extension CSVRow : ReadableElement {
+
+    public static func new<C: Context>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?) throws -> Self? {
+
+        var new = Self.init()
         
-        self.init()
+        guard let csvContext = context as? CSVReaderContext, let config = context.config as? CSVConfig else {
+            return nil
+        }
+        
         // local context
-        context.valueIndex = 0
-        context.valueStart = context.offset
-        context.valueEnd = context.offset
+        csvContext.valueIndex = 0
+        csvContext.valueStart = context.offset
+        csvContext.valueEnd = context.offset
         
         // parser flags
         var enclosed = false
@@ -51,89 +45,99 @@ extension CSVRow : Node {
         var firstEOL = false
         var lineEnd = false
         
-        var iterator = data.suffix(from: context.offset).makeIterator()
+        var iterator = bytes.suffix(from: context.offset).makeIterator()
         while !lineEnd, let char = iterator.next() {
             
             if !enclosed {
-                if char == context.config.enclose {
+                if char == config.enclose {
                     // we just hit a string delimiter
                     enclosed = true
                     // skip over this character
-                    context.valueStart += 1
+                    csvContext.valueStart += 1
                 }
-                if char == context.config.delimiter {
+                if char == config.delimiter {
                     // read value
-                    self.append(try CSVValue.read(data, context: &context))
+                    new.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
-                    context.valueStart += 1
+                    csvContext.valueStart += 1
                     if wasEnclosed {
-                        context.valueStart += 1
-                        context.valueEnd += 1
+                        csvContext.valueStart += 1
+                        csvContext.valueEnd += 1
                         wasEnclosed = false
                     }
                 }
-                if char == 0x0A && context.config.eol == .LF {
+                if char == 0x0A && config.eol == .LF {
                     // read last value in row
-                    self.append(try CSVValue.read(data, context: &context))
+                    new.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
-                    context.valueStart += 1
+                    csvContext.valueStart += 1
                     // exit loop
                     lineEnd.toggle()
                 }
-                if char == 0x0D && context.config.eol == .CR {
+                if char == 0x0D && config.eol == .CR {
                     // read last value in row
-                    self.append(try CSVValue.read(data, context: &context))
+                    new.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
-                    context.valueStart += 1
+                    csvContext.valueStart += 1
                     // exit loop
                     lineEnd.toggle()
                 }
-                if char == 0x15 && context.config.eol == .NL {
+                if char == 0x15 && config.eol == .NL {
                     // read last value in row
-                    self.append(try CSVValue.read(data, context: &context))
+                    new.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
-                    context.valueStart += 1
+                    csvContext.valueStart += 1
                     // exit loop
                     lineEnd.toggle()
                 }
-                if char == 0x0D && context.config.eol == .CR_LF && !firstEOL {
+                if char == 0x0D && config.eol == .CR_LF && !firstEOL {
                     // flag that we just hit the firstEOL character
                     firstEOL.toggle()
                 }
-                if char == 0x0A && context.config.eol == .CR_LF && firstEOL {
-                    context.valueEnd -= 1
+                if char == 0x0A && config.eol == .CR_LF && firstEOL {
+                    csvContext.valueEnd -= 1
                     // read last value in row
-                    self.append(try CSVValue.read(data, context: &context))
+                    new.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
-                    context.valueStart += 2
+                    csvContext.valueStart += 2
                     // exit loop
                     lineEnd.toggle()
                 }
             } else {
                 
-                if char == context.config.enclose {
+                if char == config.enclose {
                     // we just hit a string delimiter
                     enclosed = false
                     // skip over this character
-                    context.valueEnd -= 1
+                    csvContext.valueEnd -= 1
                     
                     wasEnclosed = true
                 }
             }
             
             // move word pointer
-            context.valueEnd += 1
+            csvContext.valueEnd += 1
             // move the pointer
             context.offset += 1
         }
         if !lineEnd {
             // there is still a value to read
-            self.append(try CSVValue.read(data, context: &context))
+            new.append(try CSVValue.new(bytes, with: &context))
         }
         
-        if self.compactMap({$0}).isEmpty {
+        if new.compactMap({$0}).isEmpty {
             return nil
         }
+        
+        return new
+    }
+    
+    public static func size<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C) -> Int? where C : Context {
+        nil
+    }
+    
+    public var byteSize: Int {
+        values.byteSize
     }
     
 }

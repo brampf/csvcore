@@ -25,13 +25,22 @@
 import Foundation
 import FileReader
 
-extension CSVValue : AbstractNode {
+extension CSVValue : ReadableElement {
     
-    public typealias Configuration = CSVConfig
-    public typealias Context = CSVReaderContext
+    public static func size<C: Context>(_ bytes: UnsafeRawBufferPointer, with context: inout C) -> Int? {
+        nil
+    }
+    
+    public var byteSize: Int {
+        0
+    }
     
     
-    public static func read(_ data: UnsafeRawBufferPointer, context: inout CSVReaderContext) throws -> Self? {
+    public static func new<C: Context>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String? = nil) throws -> Self? {
+    
+        guard let context = context as? CSVReaderContext else {
+            return nil
+        }
         
         var spec : FormatSpecifier? = nil
         if !context.ignoreFormat, !context.config.format.isEmpty,  context.valueIndex < context.config.format.count{
@@ -50,14 +59,14 @@ extension CSVValue : AbstractNode {
         var value : CSVValue?
         switch spec {
         case .Text(let encoding):
-            value = try CSVText(data[start..<end], with: encoding)
+            value = try CSVText(bytes[start..<end], with: encoding)
         case .Number(let format):
-            value = try CSVNumber(data[start..<end], with: format)
+            value = try CSVNumber(bytes[start..<end], with: format) ?? CSVText(bytes[start..<end], with: .utf8)
         case .Date(let format):
-            value = try CSVDate(data[start..<end], with: format)
+            value = try CSVDate(bytes[start..<end], with: format) ?? CSVText(bytes[start..<end], with: .utf8)
         case .none:
             // without context, we try to read text
-            value = try CSVText(data[start..<end], with: .utf8)
+            value = try CSVText(bytes[start..<end], with: .utf8)
         }
         //print("\(start)...\(end); val \(context.valueIndex) = \(value.debugDescription)")
         

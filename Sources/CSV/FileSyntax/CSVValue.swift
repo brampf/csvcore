@@ -27,7 +27,7 @@ import Foundation
 /**
  Wrapper for CSVLiteral types 
  */
-public class CSVValue : Identifiable, Hashable, CustomStringConvertible, CustomDebugStringConvertible {
+public class CSVValue : Identifiable, Hashable, CustomStringConvertible {
     
     /// value id to distinguish two `CSVValue` objects with the same value
     public var id : Int {
@@ -42,9 +42,10 @@ public class CSVValue : Identifiable, Hashable, CustomStringConvertible, CustomD
         return "CSVValue"
     }
     
+    /*
     public var debugDescription: String {
         return String(format: "%p", id)
-    }
+    }*/
     
     /**
      Hashes the id

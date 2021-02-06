@@ -24,7 +24,7 @@
 import Foundation
 import FileReader
 
-extension CSVText : Leaf {
+extension CSVText {
     public typealias  Parameter = String.Encoding
     
     public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: String.Encoding?) throws  {

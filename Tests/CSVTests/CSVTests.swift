@@ -24,20 +24,21 @@ final class CSVCoreTests: XCTestCase {
                               FormatSpecifier.Date(format: DateFormatter("yyyy/MM/dd")),
                               FormatSpecifier.Date(format: DateFormatter("yyyy-MM-dd")))
         
-        let file = try! CSVFile.read(contentsOf: url, using: config)
+        
+        let file = try! CSVFile.read(from: url, with: config)
         
 
         XCTAssertEqual(file?.header, ["String","Number1","Number2","Number3","Date1","Date2","Date3"])
             
-        XCTAssertEqual(file?.rows.count, 1)
-        XCTAssertEqual(file?.rows[0].count, 7)
-        XCTAssertEqual(file?.rows[0][0], CSVText("One"))
-        XCTAssertEqual(file?.rows[0][1], CSVNumber(42.0))
-        XCTAssertEqual(file?.rows[0][2], CSVNumber(23.32))
-        XCTAssertEqual(file?.rows[0][3], CSVNumber(32.32))
+        XCTAssertEqual(file?.rows.count, 2)
+        XCTAssertEqual(file?.rows[1].count, 7)
+        XCTAssertEqual(file?.rows[1][0], CSVText("One"))
+        XCTAssertEqual(file?.rows[1][1], CSVNumber(42.0))
+        XCTAssertEqual(file?.rows[1][2], CSVNumber(23.32))
+        XCTAssertEqual(file?.rows[1][3], CSVNumber(32.32))
         //XCTAssertEqual(file?.rows[0][4], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2012, month: 12, day: 21, hour: 0, minute: 0, second: 0).date!))
-        XCTAssertEqual(file?.rows[0][5], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!))
-        XCTAssertEqual(file?.rows[0][6], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!))
+        XCTAssertEqual(file?.rows[1][5], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 02, hour: 0, minute: 0, second: 0).date!))
+        XCTAssertEqual(file?.rows[1][6], CSVDate(DateComponents(calendar: Calendar.current, timeZone: TimeZone(secondsFromGMT: 0),  year: 2020, month: 11, day: 03, hour: 0, minute: 0, second: 0).date!))
         
     }
     
@@ -49,12 +50,12 @@ final class CSVCoreTests: XCTestCase {
         config.eol = .CR_LF
         config.delimiter = Character(",").asciiValue!
         
-        let file = try! CSVFile.read(contentsOf: url, using: config)
+        let file = try! CSVFile.read(from: url, with: config)
         
-        XCTAssertEqual(file?.rows.count, 32445)
+        XCTAssertEqual(file?.rows.count, 32446)
         XCTAssertEqual(file?.header, ["Year","Industry_aggregation_NZSIOC","Industry_code_NZSIOC","Industry_name_NZSIOC","Units","Variable_code","Variable_name","Variable_category","Value","Industry_code_ANZSIC06"])
         
-        XCTAssertEqual(file?.rows[38], CSVRow("2019","Level 1","AA","Agriculture, Forestry and Fishing","Dollars (millions)","H10","Indirect taxes","Financial performance","475","ANZSIC06 division A"), "")
+        XCTAssertEqual(file?.rows[39], ["2019","Level 1","AA","Agriculture, Forestry and Fishing","Dollars (millions)","H10","Indirect taxes","Financial performance","475","ANZSIC06 division A"], "")
         
         file?.rows.forEach({ row in
             XCTAssertEqual(row.count, 10)
@@ -65,18 +66,17 @@ final class CSVCoreTests: XCTestCase {
     func test_file_0003() {
         
         let url = Bundle.module.url(forResource: "test0003", withExtension: "csv")!
-        let data = try! Data(contentsOf: url)
         
         var config = CSVConfig()
         config.eol = .LF
         config.delimiter = ";".utf8.map{$0}.first!
         
-        let file = try? CSVFile.read(data, config: config)
+        let file = try? CSVFile.read(from: url, with: config)
         
-        XCTAssertEqual(file?.rows.count, 5)
+        XCTAssertEqual(file?.rows.count, 6)
         XCTAssertEqual(file?.header, ["Username","Login email","Identifier","First name","Last name"])
         
-        XCTAssertEqual(file?.rows[0].count, 5)
-        XCTAssertEqual(file?.rows[0], CSVRow("booker12","rachel@example.com","9012","Rachel","Booker"))
+        XCTAssertEqual(file?.rows[1].count, 5)
+        XCTAssertEqual(file?.rows[1], ["booker12","rachel@example.com","9012","Rachel","Booker"])
     }
 }

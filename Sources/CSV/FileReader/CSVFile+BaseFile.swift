@@ -24,33 +24,30 @@
 import Foundation
 import FileReader
 
-extension CSVFile : Root {
-
-    
-
-}
-
-extension CSVFile : Node {
-    public typealias Configuration = CSVConfig
+extension CSVFile : BaseFile {
     public typealias Context = CSVReaderContext
     
-    
-    public init?(_ data: UnsafeRawBufferPointer, context: inout CSVReaderContext) throws {
+    /*
+    public mutating func read<C: FileReader.Context>(_ bytes: UnsafeRawBufferPointer, context: inout C, _ symbol: String?) throws{
+
+        guard let csvContext = context as? CSVReaderContext else {
+            return
+        }
         
         // read head
-        if !context.ignoreHead {
-            context.ignoreFormat = true
-            if context.offset < data.endIndex, let head = try CSVRow(data, context: &context) {
+        if !csvContext.ignoreHead {
+            csvContext.ignoreFormat = true
+            if context.offset < bytes.endIndex, let head = try CSVRow.readElement(bytes, with: &context) {
                 self.header = head.map{$0?.description ?? ""}
             }
-            context.ignoreFormat = false
+            csvContext.ignoreFormat = false
         }
         
         // read the file line by line until there is no more to read
-        while context.offset < data.endIndex, let values = try CSVRow(data, context: &context){
+        while context.offset < bytes.endIndex, let values = try CSVRow.readElement(bytes, with: &context){
             // parse values
             self.rows.append(values)
         }
     }
-    
+    */
 }

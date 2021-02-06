@@ -10,18 +10,18 @@ final class CSVFileTests: XCTestCase {
 
     func testRowCount() {
         
-        var file = CSVFile()
-        file.rows.append([CSVText("one")])
+        let file = CSVFile()
+        file.rows.append(["one"])
         
         XCTAssertEqual(file.rows.count, 1)
         XCTAssertEqual(file.maxRowCount, 1)
         
-        file.rows.append(CSVRow(1,2,3))
+        file.rows.append([1,2,3])
 
         XCTAssertEqual(file.rows.count, 2)
         XCTAssertEqual(file.maxRowCount, 3)
         
-        file.rows.append(CSVRow("Eins","Zwei"))
+        file.rows.append(["Eins","Zwei"])
         
         XCTAssertEqual(file.rows.count, 3)
         XCTAssertEqual(file.maxRowCount, 3)
@@ -45,17 +45,17 @@ final class CSVFileTests: XCTestCase {
         
         XCTAssertEqual(file1.maxRowCount, 2)
         
-        file1.rows.append(CSVRow(1,2,3))
+        file1.rows.append([1,2,3])
         
         XCTAssertEqual(file1.maxRowCount, 3)
         
-        file1.rows.append(CSVRow(4,5))
+        file1.rows.append([4,5])
         
         XCTAssertEqual(file1.maxRowCount, 3)
         
         file1.rows.remove(at: 0)
         
-        XCTAssertEqual(file1.maxRowCount, 2)
+        XCTAssertEqual(file1.maxRowCount, 3)
     }
     
     func testIsIrregular() {
@@ -64,7 +64,7 @@ final class CSVFileTests: XCTestCase {
         
         XCTAssertEqual(file.isIrregular, false)
         
-        file.rows.append(CSVRow(1,2,3,4))
+        file.rows.append([1,2,3,4])
         
         XCTAssertEqual(file.isIrregular, false)
         
@@ -74,9 +74,9 @@ final class CSVFileTests: XCTestCase {
         
         file.header = ["One","Two","Three"]
         
-        XCTAssertEqual(file.isIrregular, true)
+        XCTAssertEqual(file.isIrregular, false)
         
-        file.rows.append(CSVRow(5,6,7,8))
+        file.rows.append([5,6,7,8])
         
         XCTAssertEqual(file.isIrregular, true)
         

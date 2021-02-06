@@ -25,13 +25,52 @@
 import Foundation
 
 /// A row in the CSV File
-public typealias CSVRow = [CSVValue?]
-
-extension CSVRow {
+public struct CSVRow : RandomAccessCollection, MutableCollection {
+    public typealias Element = CSVValue?
+    public typealias Index = Int
     
-    public init(_ arrayLiteral: CSVLiteral?...){
-        
-        let row : [CSVValue?] = arrayLiteral.map{ val in
+    var values : [Element] = []
+    
+    public subscript(position: Int) -> CSVValue? {
+        get {
+            values[position]
+        }
+        set {
+            values[position] = newValue
+        }
+    }
+    
+    public var count : Int {
+        values.count
+    }
+    
+    public var startIndex: Int {
+        values.startIndex
+    }
+    
+    public var endIndex: Int {
+        values.endIndex
+    }
+    
+    public func index(before i: Int) -> Int {
+        values.index(before: i)
+    }
+    
+    public func index(after i: Int) -> Int {
+        values.index(after: i)
+    }
+    
+    public mutating func append(_ newElement: Element) {
+        values.append(newElement)
+    }
+    
+}
+
+extension CSVRow : ExpressibleByArrayLiteral {
+    public typealias ArrayLiteralElement = CSVLiteral?
+    
+    public init(arrayLiteral elements: CSVLiteral?...){
+        let row : [CSVValue?] = elements.map{ val in
             
             switch val {
             case let val as String: return CSVText(val)
@@ -42,7 +81,18 @@ extension CSVRow {
             
         }
         
-        self.init(row)
+        self.init(values: row)
+    }
+}
+
+extension CSVRow : Equatable, Hashable {
+    
+    public init(_ elements: CSVValue...){
+        self.values = elements
+    }
+    
+    public init<S: Sequence>(_ s: S) where S.Element == CSVValue? {
+        self.init(values: Array(s))
     }
     
     public init<S: Sequence>(_ s: S) where S.Element == CSVLiteral? {
@@ -58,32 +108,14 @@ extension CSVRow {
             
         }
         
-        self.init(row)
+        self.init(values: row)
     }
     
-    public static func == (lhs: CSVRow, rhs: [CSVLiteral?]) -> Bool {
-        return lhs.elementsEqual(CSVRow(rhs))
+    public static func == (lhs: CSVRow, rhs: CSVRow) -> Bool {
+        return lhs.elementsEqual(rhs)
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(values)
     }
 }
-
-//MARK:- Comparion on Optionals
-extension Optional where Wrapped == CSVRow {
-    
-    public static func == (lhs: Optional<CSVRow>, rhs: [CSVLiteral?]) -> Bool {
-        if let l = lhs {
-            return l.elementsEqual(CSVRow(rhs))
-        } else {
-            return false
-        }
-    }
-    
-    public static func == (lhs: Optional<CSVRow>, rhs: [CSVLiteral]) -> Bool {
-        if let l = lhs {
-            return l.elementsEqual(CSVRow(rhs))
-        } else {
-            return false
-        }
-    }
-}
-
-

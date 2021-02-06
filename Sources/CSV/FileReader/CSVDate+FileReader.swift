@@ -24,10 +24,10 @@
 import Foundation
 import FileReader
 
-extension CSVDate : Leaf {
+extension CSVDate {
     public typealias Parameter = DateFormatter
     
-    public convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: DateFormatter?) throws {
+    convenience init?(_ data: Slice<UnsafeRawBufferPointer>, with parameter: DateFormatter?) throws {
         
         guard let string = String(data: Data(data), encoding: .ascii) else {
             return nil

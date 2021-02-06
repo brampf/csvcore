@@ -22,34 +22,37 @@
  
  */
 import Foundation
+import FileReader
 
 public struct CSVFile {
     
-    public var header : [String] = []
-    {
-        didSet {
-            let old = maxRowCount
-            maxRowCount = header.count != maxRowCount ? header.count : maxRowCount
-            isIrregular = old > 0 && old != maxRowCount
+    public var header : CSVRow {
+        get {
+            rows[0]
+        }
+        set {
+            if rows.isEmpty { rows = [newValue] }
+            else { rows[0] = newValue }
         }
     }
     
-    public var rows : [CSVRow] = [] {
-        didSet {
-            let old = maxRowCount
-            
-            maxRowCount = rows.reduce(into: 0, { maximum, row in
-                let len = row.count
-                maximum = max(len,maximum)
-            })
-            
-            isIrregular = old > 0 && old != maxRowCount
+    @Persistent public var rows : [CSVRow] = []
+    
+    public var maxRowCount : Int {
+        
+        rows.reduce(into: 0){ max,row in
+            max = Swift.max(max, row.count)
         }
     }
     
-    public var maxRowCount : Int = 0
-    
-    public var isIrregular : Bool = false
+    public var isIrregular : Bool {
+        
+        let max = maxRowCount
+        return rows.contains { row in
+            row.count != max
+        }
+        
+    }
     
     /**
      Initializer
@@ -61,16 +64,20 @@ public struct CSVFile {
     /**
      Initializer
      */
-    public init(header: [String] = [], rows: [CSVRow] = []) {
-        self.header = header
+    public init(rows: [CSVRow] = []) {
         self.rows = rows
     }
     
     /**
      Initializer
      */
-    public init(header: [String] = [], _ literals: [[CSVLiteral?]] = []) {
-        self.header = header
+    public init(_ literals: [[CSVLiteral?]] = []) {
         self.rows = literals.csv
     }
+}
+
+extension CSVFile {
+    
+
+    
 }
