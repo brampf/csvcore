@@ -24,11 +24,11 @@
 import Foundation
 import FileReader
 
-extension CSVRow : ReadableElement {
+extension CSVRow : AnyReadable {
 
-    public static func new<C: Context>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?) throws -> Self? {
-
-        var new = Self.init()
+    public static func new<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?) throws -> CSVRow? where C : Context {
+ 
+        var new = Self()
         
         guard let csvContext = context as? CSVReaderContext, let config = context.config as? CSVConfig else {
             return nil
@@ -57,7 +57,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == config.delimiter {
                     // read value
-                    new.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     if wasEnclosed {
@@ -68,7 +68,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == 0x0A && config.eol == .LF {
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -76,7 +76,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == 0x0D && config.eol == .CR {
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -84,7 +84,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == 0x15 && config.eol == .NL {
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -97,7 +97,7 @@ extension CSVRow : ReadableElement {
                 if char == 0x0A && config.eol == .CR_LF && firstEOL {
                     csvContext.valueEnd -= 1
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 2
                     // exit loop
@@ -122,17 +122,22 @@ extension CSVRow : ReadableElement {
         }
         if !lineEnd {
             // there is still a value to read
-            new.append(try CSVValue.new(bytes, with: &context))
+            new.append(try CSVValue.new(bytes, with: &context, symbol))
         }
         
-        if new.compactMap({$0}).isEmpty {
+        if new.values.compactMap({$0}).isEmpty {
             return nil
         }
         
         return new
     }
     
-    public static func size<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C) -> Int? where C : Context {
+    public mutating func read<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?, upperBound: Int?) throws where C : Context {
+        //
+    }
+    
+    
+    public static func upperBound<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C) throws -> Int? where C : Context {
         nil
     }
     

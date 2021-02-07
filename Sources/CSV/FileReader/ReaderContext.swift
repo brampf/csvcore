@@ -26,7 +26,7 @@ import Foundation
 import FileReader
 
 /// Parser context information
-public final class CSVReaderContext : ReaderContext<CSVConfig> {
+public final class CSVReaderContext : DefaultContext<CSVConfig> {
     public typealias Configuration = CSVConfig
     
     /// Format overwrite (will always parse as `CSVText`

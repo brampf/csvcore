@@ -33,6 +33,10 @@ public final class CSVText : CSVValue {
         self.val = value
     }
     
+    public required init() {
+        self.val = ""
+    }
+    
     override public var description: String {
         return val.description
     }

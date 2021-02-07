@@ -25,19 +25,10 @@
 import Foundation
 import FileReader
 
-extension CSVValue : ReadableElement {
+extension CSVValue : AbstractReadable {
     
-    public static func size<C: Context>(_ bytes: UnsafeRawBufferPointer, with context: inout C) -> Int? {
-        nil
-    }
-    
-    public var byteSize: Int {
-        0
-    }
-    
-    
-    public static func new<C: Context>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String? = nil) throws -> Self? {
-    
+    public static func next<C>(_ bytes: UnsafeRawBufferPointer, with context: C, _ symbol: String?) throws -> CSVValue? where C : Context {
+
         guard let context = context as? CSVReaderContext else {
             return nil
         }
@@ -75,7 +66,10 @@ extension CSVValue : ReadableElement {
         // move the word pointer
         context.valueStart = end
         
-        return value as? Self
+        return value
     }
 }
 
+extension CSVValue : AutoReadable {
+    
+}

@@ -37,7 +37,11 @@ public final class CSVNumber : CSVValue {
     init(_ value: Int){
         self.val = Double(value)
     }
-
+    
+    public required init() {
+        self.val = 0
+    }
+    
     override public var description: String {
         return val.description
     }
