@@ -24,14 +24,24 @@
 import Foundation
 import FileReader
 
-extension CSVRow : AnyReadable {
+extension CSVRow : Readable {
+    
+    public static func next<C>(_ bytes: UnsafeRawBufferPointer, with context: C, _ symbol: String?) throws -> (element: ReadableElement.Type?, size: Int?) where C : Context {
+        (Self.self,nil)
+    }
+    
+}
 
-    public static func new<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?) throws -> CSVRow? where C : Context {
- 
-        var new = Self()
+extension CSVRow : ReadableElement {
+    
+    public static func new() -> CSVRow {
+        CSVRow()
+    }
+    
+    public mutating func read<C>(_ bytes: UnsafeRawBufferPointer, context: inout C, _ symbol: String?) throws where C : Context {
         
         guard let csvContext = context as? CSVReaderContext, let config = context.config as? CSVConfig else {
-            return nil
+            return
         }
         
         // local context
@@ -57,7 +67,7 @@ extension CSVRow : AnyReadable {
                 }
                 if char == config.delimiter {
                     // read value
-                    new.append(try CSVValue.new(bytes, with: &context, symbol))
+                    self.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
                     csvContext.valueStart += 1
                     if wasEnclosed {
@@ -68,7 +78,7 @@ extension CSVRow : AnyReadable {
                 }
                 if char == 0x0A && config.eol == .LF {
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context, symbol))
+                    self.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -76,7 +86,7 @@ extension CSVRow : AnyReadable {
                 }
                 if char == 0x0D && config.eol == .CR {
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context, symbol))
+                    self.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -84,7 +94,7 @@ extension CSVRow : AnyReadable {
                 }
                 if char == 0x15 && config.eol == .NL {
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context, symbol))
+                    self.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -97,7 +107,7 @@ extension CSVRow : AnyReadable {
                 if char == 0x0A && config.eol == .CR_LF && firstEOL {
                     csvContext.valueEnd -= 1
                     // read last value in row
-                    new.append(try CSVValue.new(bytes, with: &context, symbol))
+                    self.append(try CSVValue.new(bytes, with: &context))
                     // skip over this character
                     csvContext.valueStart += 2
                     // exit loop
@@ -122,23 +132,12 @@ extension CSVRow : AnyReadable {
         }
         if !lineEnd {
             // there is still a value to read
-            new.append(try CSVValue.new(bytes, with: &context, symbol))
+            self.append(try CSVValue.new(bytes, with: &context))
         }
         
-        if new.values.compactMap({$0}).isEmpty {
-            return nil
+        if self.values.compactMap({$0}).isEmpty {
+            self = []
         }
-        
-        return new
-    }
-    
-    public mutating func read<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?, upperBound: Int?) throws where C : Context {
-        //
-    }
-    
-    
-    public static func upperBound<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C) throws -> Int? where C : Context {
-        nil
     }
     
     public var byteSize: Int {
