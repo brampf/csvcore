@@ -34,7 +34,7 @@ public class CSVValue : Identifiable, Hashable, CustomStringConvertible {
         unsafeBitCast(self, to: Int.self)
     }
     
-    internal init() {
+    public required init() {
         
     }
     

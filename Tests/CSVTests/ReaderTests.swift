@@ -1,5 +1,6 @@
 import XCTest
 @testable import CSV
+@testable import FileReader
 
 final class ReaderTests: XCTestCase {
     
@@ -98,7 +99,7 @@ final class ReaderTests: XCTestCase {
         
         var context = CSVReaderContext()
         let row = try data.withUnsafeBytes { ptr in
-            try CSVRow.readElement(ptr, with: &context, nil)
+            try CSVRow.read(ptr, with: &context, nil)
         }
         
         XCTAssertNotNil(row)
@@ -226,7 +227,7 @@ final class ReaderTests: XCTestCase {
         var context = CSVReaderContext(using: config, out: nil)
         
         let result1 = line1.data(using: .utf8)?.withUnsafeBytes({ ptr in
-            try? CSVRow.readElement(ptr, with: &context, nil)
+            try? CSVRow.read(ptr, with: &context, nil)
         })
         
         XCTAssertEqual(result1?.count, 6)

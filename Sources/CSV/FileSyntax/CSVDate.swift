@@ -41,6 +41,10 @@ public final class CSVDate : CSVValue {
         }
     }
     
+    public required init() {
+        self.val = Date(timeIntervalSince1970: 0)
+    }
+    
     override public var description: String {
         return val.description
     }
