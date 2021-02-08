@@ -24,24 +24,22 @@
 import Foundation
 import FileReader
 
-extension CSVRow : Readable {
+extension CSVRow : AnyReadable {
     
-    public static func next<C>(_ bytes: UnsafeRawBufferPointer, with context: C, _ symbol: String?) throws -> (element: ReadableElement.Type?, size: Int?) where C : Context {
-        (Self.self,nil)
+    public static func upperBound<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C) throws -> Int? where C : Context {
+        nil
     }
     
-}
-
-extension CSVRow : ReadableElement {
-    
-    public static func new() -> CSVRow {
-        CSVRow()
+    public mutating func read<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?, upperBound: Int?) throws where C : Context {
+        // don't re-read this
     }
-    
-    public mutating func read<C>(_ bytes: UnsafeRawBufferPointer, context: inout C, _ symbol: String?) throws where C : Context {
+  
+    public static func new<C>(_ bytes: UnsafeRawBufferPointer, with context: inout C, _ symbol: String?) throws -> CSVRow? where C : Context {
+        
+        var new = Self()
         
         guard let csvContext = context as? CSVReaderContext, let config = context.config as? CSVConfig else {
-            return
+            return nil
         }
         
         // local context
@@ -67,7 +65,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == config.delimiter {
                     // read value
-                    self.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     if wasEnclosed {
@@ -78,7 +76,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == 0x0A && config.eol == .LF {
                     // read last value in row
-                    self.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -86,7 +84,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == 0x0D && config.eol == .CR {
                     // read last value in row
-                    self.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -94,7 +92,7 @@ extension CSVRow : ReadableElement {
                 }
                 if char == 0x15 && config.eol == .NL {
                     // read last value in row
-                    self.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 1
                     // exit loop
@@ -107,7 +105,7 @@ extension CSVRow : ReadableElement {
                 if char == 0x0A && config.eol == .CR_LF && firstEOL {
                     csvContext.valueEnd -= 1
                     // read last value in row
-                    self.append(try CSVValue.new(bytes, with: &context))
+                    new.append(try CSVValue.new(bytes, with: &context, symbol))
                     // skip over this character
                     csvContext.valueStart += 2
                     // exit loop
@@ -132,12 +130,14 @@ extension CSVRow : ReadableElement {
         }
         if !lineEnd {
             // there is still a value to read
-            self.append(try CSVValue.new(bytes, with: &context))
+            new.append(try CSVValue.new(bytes, with: &context, symbol))
         }
         
-        if self.values.compactMap({$0}).isEmpty {
-            self = []
+        if new.values.compactMap({$0}).isEmpty {
+            return nil
         }
+        
+        return new
     }
     
     public var byteSize: Int {
